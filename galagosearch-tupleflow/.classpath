@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry including="**/*.java" kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
+	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
+	<classpathentry kind="var" path="M2_REPO/javax/servlet/jsp/jsp-api/2.1/jsp-api-2.1.jar" sourcepath="M2_REPO/javax/servlet/jsp/jsp-api/2.1/jsp-api-2.1-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar" sourcepath="M2_REPO/junit/junit/3.8.1/junit-3.8.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/antlr/stringtemplate/3.0/stringtemplate-3.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/antlr/antlr/2.7.7/antlr-2.7.7.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/mortbay/jetty/jetty-embedded/6.1.5/jetty-embedded-6.1.5.jar" sourcepath="M2_REPO/org/mortbay/jetty/jetty-embedded/6.1.5/jetty-embedded-6.1.5-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/mortbay/jetty/jetty/6.1.5/jetty-6.1.5.jar" sourcepath="M2_REPO/org/mortbay/jetty/jetty/6.1.5/jetty-6.1.5-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/mortbay/jetty/jetty-util/6.1.5/jetty-util-6.1.5.jar" sourcepath="M2_REPO/org/mortbay/jetty/jetty-util/6.1.5/jetty-util-6.1.5-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/mortbay/jetty/servlet-api-2.5/6.1.5/servlet-api-2.5-6.1.5.jar" sourcepath="M2_REPO/org/mortbay/jetty/servlet-api-2.5/6.1.5/servlet-api-2.5-6.1.5-sources.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
