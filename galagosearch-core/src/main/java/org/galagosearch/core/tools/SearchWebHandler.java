@@ -125,8 +125,8 @@ public class SearchWebHandler extends AbstractHandler {
                 .replace("&", "&amp;");
     }
 
-    public void retrieveImage(OutputStream output) throws IOException {
-        InputStream image = getClass().getResourceAsStream("/images/galago.png");
+    public void retrieveImage(OutputStream output,HttpServletRequest request) throws IOException {
+        InputStream image = getClass().getResourceAsStream(request.getPathInfo());
         Utility.copyStream(image, output);
         output.close();
     }
@@ -134,7 +134,7 @@ public class SearchWebHandler extends AbstractHandler {
     public void handleImage(HttpServletRequest request, HttpServletResponse response) throws IOException {
         OutputStream output = response.getOutputStream();
         response.setContentType("image/png");
-        retrieveImage(output);
+        retrieveImage(output,request);
     }
 
     public void handleSearch(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -146,6 +146,33 @@ public class SearchWebHandler extends AbstractHandler {
         PrintWriter writer = response.getWriter();
         writer.append("<html>\n");
         writer.append("<head>\n");
+        //writer.append("<link rel=\"stylesheet\" href=\"jquery.tooltip.css\" type=\"text/css\" />");
+        /*writer.append("div.jquery-gdakram-tooltip {"+
+  "width: 340px;"+
+  "color: white;"+
+  "font-size: 12px;"+
+	"position: absolute;"+
+	"z-index: 10000;"+
+	"top: 0px;"+
+	"left: 0px;"+
+	"display: none;}"+
+
+
+"div.jquery-gdakram-tooltip div.content {-moz-border-radius: 1em;  -webkit-border-radius: 1em;  border-radius: 1em;  background-color: #671329;  width: 280px;  min-height: 200px;  float: left;  padding: 10px;}"+
+"div.jquery-gdakram-tooltip div.content h1 {  font-size: 16px;  border-bottom: 1px solid #C4C4C4;  padding-bottom: 5px;}"+
+
+"div.jquery-gdakram-tooltip div.up_arrow {  background : url('images/up_arrow.png') 60px 0px no-repeat;  width: 100%;  height: 20px;}"+
+
+"div.jquery-gdakram-tooltip div.down_arrow {  background : url('images/down_arrow.png') 60px 0px no-repeat;  width: 100%;  height: 20px;}"+
+
+"div.jquery-gdakram-tooltip div.left_arrow {  height: 100%;}"+
+
+"div.jquery-gdakram-tooltip div.left_arrow {  float:left;  background : url('images/left_arrow.png') 0px 0px no-repeat;  width: 20px;  height: 20px;  position: relative;  top: 40px;  left: 0px;}"+
+
+"div.jquery-gdakram-tooltip div.right_arrow {  float:right;  background : url('images/right_arrow.png') 0px 0px no-repeat;  width: 20px;  height: 20px;  position: relative;  top: 40px;  right: 20px;}");*/
+        writer.append("<script src=\"jquery.tooltip.js\"></script>");
+        writer.append("<script src=\"jquery.tooltip.min.js\"></script>");
+        writer.append("<script type=\"text/javascript\">$(document).ready(function(){ $j = jQuery.noConflict(); $j(document).ready(function(){$j(\"div.result\").tooltip();});});</script>");
         writer.append(String.format("<title>%s - Galago Search</title>\n", displayQuery));
         writeStyle(writer);
         writer.append("<script type=\"text/javascript\">\n");
@@ -161,12 +188,9 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("</head>\n<body>\n");
 
         writer.append("<div id=\"header\">\n");
-        writer.append("<table><tr>");
-        writer.append("<td><a href=\"http://www.galagosearch.org\">" +
-                      "<img src=\"/images/galago.png\"></a></td>");
-        writer.append("<td><br/><form action=\"search\">" +
-                      String.format("<input name=\"q\" size=\"40\" value=\"%s\" />", displayQuery) +
-                      "<input value=\"Search\" type=\"submit\" /></form></td>");
+        writer.append("<table ><tr >");
+        writer.append("<td width=\"15%\"><a href=\"http://www.galagosearch.org\">" +"<img src=\"/images/galago.png\" width=\"100%\"></a></td>");
+        writer.append("<td width=\"85%\"><br/><form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"70\" style=\"height: 30px\"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 27px; width:80px\" ></form></td>");
         writer.append("</tr>");
         writer.append("</table>\n");
         writer.append("</div>\n");
@@ -182,9 +206,12 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("</div>");
 
         for (SearchResultItem item : result.items) {
-            writer.append("<div id=\"result\">\n");
+        	writer.append("<table style=\"width:100%\">");
+        	writer.append("<tr>\n");
+        	writer.append("<td width=\"15%\"></td>\n");
+        	writer.append("<td width=\"85%\">\n");
+            writer.append("<div onMouseOver=\"this.className='highlight'\" onMouseOut=\"this.className='normal'\" id=\"result\">\n");
             writer.append(String.format("<a href=\"document?identifier=%s\">%s</a><br/>" +
-                                        "<div id=\"summary\">%s</div>\n" +
                                         "<div id=\"meta\">%s - %s</div>\n",
                                         item.identifier,
                                         item.displayTitle,
@@ -192,6 +219,10 @@ public class SearchWebHandler extends AbstractHandler {
                                         scrub(item.identifier),
                                         scrub(item.url)));
             writer.append("</div>\n");
+            writer.append(" <div class=\"tooltip_description\" style=\"display:none\" title=\"Item 1 Description\">th desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>");
+            writer.append("</td>\n");
+            writer.append("</tr>");
+            writer.append("</table>");
         }
 
         String startAtString = request.getParameter("start");
@@ -273,11 +304,16 @@ public class SearchWebHandler extends AbstractHandler {
     }
 
     public void writeStyle(PrintWriter writer) {
-        writer.write("<style type=\"text/css\">\n");
-        writer.write("body { font-family: Helvetica, sans-serif; }\n");
+    	writer.write("<style type=\"text/css\">\n");
+    	writer.write(".highlight { background-color: #C0C0C0 }");
+    	writer.write(".bgimg { background-image: url(/images/2.png); width:100% height:100%}");
+    	writer.write("body  { font-family: Helvetica, sans-serif;}\n");
+    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px;}");
+    	writer.write(".lighter {width:95%;	height:50px;padding:40px 25px;}");
+    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); color:#7da2aa;cursor: pointer;}");
         writer.write("img { border-style: none; }\n");
-        writer.write("#box { border: 1px solid #ccc; margin: 100px auto; width: 500px;" +
-                     "background: rgb(210, 233, 217); }\n");
+        writer.write("#box { solid #ccc; margin: 10px auto; width: 500px;\" }\n");
+        writer.write("#bg {  position: fixed;  top: 0;  left: 0;min-width: 100%;min-height: 100%;});");
         writer.write("#box a { font-size: small; text-decoration: none; }\n");
         writer.write("#box a:link { color: rgb(0, 93, 40); }\n");
         writer.write("#box a:visited { color: rgb(90, 93, 90); }\n");
@@ -293,17 +329,30 @@ public class SearchWebHandler extends AbstractHandler {
         PrintWriter writer = response.getWriter();
         response.setContentType("text/html");
 
-        writer.append("<html>\n");
+        writer.append("<html background-size: cover; >\n");
         writer.append("<head>\n");
-        writeStyle(writer);
+        //writeStyle(writer);
+        writer.append("<script type=\"text/javascript\">");
+        writer.append("$('button').click(function() { $('#comment1').after($('<div id=\"comment2\"><p>Next comment</p><div class=\"rateit\"></div></div>'));  $('#comment2 .rateit').rateit();});");
+        writer.write("</script>");
+        writer.write("<style type=\"text/css\">\n");
+    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px;}");
+    	writer.write(".lighter {width:95%;	height:50px;padding:40px 25px;}");
+    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); color:#7da2aa;cursor: pointer;}");
+    	writer.write("body  { font-family: Helvetica, sans-serif;  background-image: url(/images/timeMachine1.jpg);background-size:cover;background-repeat: no-repeat; fixed; }\n");
+        writer.write("img { border-style: none; }\n");
+        writer.write("#box { solid #ccc; margin: 0; display:inline-block; position:relative; }\n");
+        //writer.write("#bg {  display: block;position: absolute;top: 0;left: 0;cursor: pointer; height:100px;});");
+        writer.write("#header { background: rgb(210, 233, 217); border: 1px solid #ccc; }\n");
+        writer.write("</style>");
         writer.append("<title>Galago Search</title></head>");
-        writer.append("<body>");
-        writer.append("<center><br/><br/><div id=\"box\">" +
-                      "<a href=\"http://www.galagosearch.org\">" +
-                      "<img src=\"/images/galago.png\"/></a><br/>\n");
-        writer.append("<form action=\"search\"><input name=\"q\" size=\"40\">" +
-                      "<input value=\"Search\" type=\"submit\" /></form><br/><br/>");
+        writer.append("<body></a><br/>\n");
+        
+        writer.append("<center><br/><br/><div id=\"lighter\" ></a><br/>\n");
+        writer.append("<form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"80\" style=\"height: 40px\" placeholder=\"Enter your query and start the time machine :p \"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 37px; width:80px\" ></span></form><br/><br/>");
+        writer.append("<div class=\"rateit\" data-rateit-value=\"2.5\" data-rateit-ispreset=\"true\" data-rateit-readonly=\"true\"></div>");
         writer.append("</div></center></body></html>\n");
+        
         writer.close();
     }
 
