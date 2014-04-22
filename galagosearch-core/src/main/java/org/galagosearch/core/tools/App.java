@@ -299,10 +299,7 @@ public class App {
         Iterator it = Time.tReader.getIterator();
         
         for(;it.nextKey();){        	
-        	DataStream dis = it.getValueStream();
-        	byte[] data = new byte[(int) it.getValueLength()];
-        	dis.readFully(data);
-        	Time.ps.println(it.getKey() + " : " + new String(data));        	
+        	Time.ps.println(it.getKey() + " : " + it.getValueString());        	
         }
         //*/
         

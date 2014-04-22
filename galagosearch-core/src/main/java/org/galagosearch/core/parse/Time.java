@@ -27,14 +27,6 @@ public class Time implements Comparable<Time>{
 
 	int date, month, year;
 
-	public static void copy(Time t1, Time t2) {
-		// TODO Auto-generated constructor stub
-		t1.date = t2.date;
-		t1.month = t2.month;
-		t1.year = t2.year;
-	}
-
-
 	/**
 	 * To set the respective date, month, year mapping to 
 	 * Numbers Jan to 1, Feb to 2 respectively
@@ -66,7 +58,7 @@ public class Time implements Comparable<Time>{
 		monthMap.put("nov", 11);monthMap.put("november", 11);	monthMap.put("11", 11);
 		monthMap.put("dec", 12);monthMap.put("december", 12);	monthMap.put("12", 12);
 
-		monthMap.put("fall", 9);
+		monthMap.put("fall", 9); monthMap.put("qtr", 4);
 	}
 
 
@@ -96,12 +88,23 @@ public class Time implements Comparable<Time>{
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * to retrieve time from the index
+	 * @param key
+	 * @return string representation of TimeFrame
+	 * @throws IOException
+	 */
+	public static String getTime(String key) throws IOException{
+		return tReader.getValueString(key);
+	}
 
 	public int compareTo(Time t) {
 		// TODO Auto-generated method stub
 		if(year == 0){
 			return 0;
 		}
+		
 		if(year == t.year){
 			if(month == t.month){
 				return date - t.date;

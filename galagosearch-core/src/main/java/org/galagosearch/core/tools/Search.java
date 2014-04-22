@@ -2,13 +2,15 @@
 
 package org.galagosearch.core.tools;
 
-import org.galagosearch.core.retrieval.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.galagosearch.core.parse.Document;
+import org.galagosearch.core.retrieval.Retrieval;
+import org.galagosearch.core.retrieval.ScoredDocument;
 import org.galagosearch.core.retrieval.query.Node;
 import org.galagosearch.core.retrieval.query.SimpleQuery;
 import org.galagosearch.core.retrieval.query.StructuredQuery;
@@ -111,6 +113,7 @@ public class Search {
             if (summarize) {
                 item.summary = getSummary(document, queryTerms);
             }
+            System.out.println(results[i].score);
 
             item.metadata = document.metadata;
             result.items.add(item);

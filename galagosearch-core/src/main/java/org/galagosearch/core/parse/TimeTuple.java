@@ -6,6 +6,8 @@ import java.util.List;
 public class TimeTuple{
 	Time tb_l, tb_u, te_l, te_u;
 	
+	int lastYear;
+	
 	public TimeTuple(){
 		tb_l = new Time();
 		tb_u = new Time();
@@ -27,6 +29,8 @@ public class TimeTuple{
 		// TODO Auto-generated method stub
 		document.timeFrame = new TimeTuple();
 		Time t = new Time();
+		
+		 
 		for (int i = 0; i < document.terms.size(); ++i) {
             String term = document.terms.get(i);
             
@@ -37,8 +41,11 @@ public class TimeTuple{
                 
                 document.timeFrame.update(t);
             }
-            else{
+            else if(isMonth(term)){
+            	t.month = Time.monthMap.get(term);
+            	t.date = getDate(document.terms, i);
             	
+            	if(t.year != 0) document.timeFrame.update(t);
             }
         }
 	}
@@ -46,17 +53,59 @@ public class TimeTuple{
 	private void update(Time t) {
 		// TODO Auto-generated method stub
 		
-		if(tb_l.compareTo(t) >= 0) Time.copy(tb_l, t);
-		Time.copy(tb_u, t);
-		Time.copy(te_l, t);
-		if(te_u.compareTo(t) <= 0)Time.copy(te_u, t);
+		if(tb_l.compareTo(t) >= 0){
+			copy(tb_l, t, 1, 1);
+			copy(tb_u, t, 30, 12);
+		}		
+		
+		if(te_u.compareTo(t) <= 0) {
+			copy(te_l, t, 1, 1);
+			copy(te_u, t, 30, 12);
+		}
+	}
+	
+	/**
+	 * Copies time t1 from t2 
+	 * @param t1 time to copy
+	 * @param t2 time from copy
+	 * @param defDate default date
+	 * @param defMonth default value
+	 */
+	public static void copy(Time t1, Time t2, int defDate, int defMonth) {
+		// TODO Auto-generated constructor stub
+		
+		if(t2.date != 0) t1.date = t2.date;
+		else t1.date = defDate;
+		
+		if(t2.month != 0) t1.month = t2.month;
+		else t1.month = defMonth;
+		
+		if(t2.year != 0){
+			t1.year = t2.year;
+		}
 	}
 
 	private static int getDate(List<String> terms, int i) {
 		// TODO Auto-generated method stub
-		return 1;
+		
+		if (i > 0 && isDate(terms.get(i-1))) {
+			return Integer.parseInt(terms.get(i-1));
+		}
+		
+		if (i < terms.size()-1 && isDate(terms.get(i+1))) {
+			return Integer.parseInt(terms.get(i+1));
+		}
+		
+		return 0;
 	}
 	
+	private static boolean isDate(String term) {
+		// TODO Auto-generated method stub
+		
+		if(term.length() > 2 || !term.matches("[0-9]+")) return false;
+		else return true;
+	}
+
 	public String toString() {
 		return  " tb_l : " + tb_l.toString() +
 				" tb_u : " + tb_u.toString() +
@@ -69,7 +118,7 @@ public class TimeTuple{
 	 * @return true if month is a valid month literal
 	 */
 	private static boolean isMonth(String month) {
-		return Time.monthMap.containsKey(month);
+		return Time.monthMap.containsKey(month.toLowerCase());
 	}
 
 	/**
@@ -91,7 +140,7 @@ public class TimeTuple{
 			return Time.monthMap.get(terms.get(i+1));
 		}
 
-		return 1;
+		return 0;
 	}
 
 	/**
@@ -110,5 +159,22 @@ public class TimeTuple{
 		return Character.isDigit(year.charAt(1)) &&
 				Character.isDigit(year.charAt(2)) &&
 				Character.isDigit(year.charAt(3));
+	}
+	
+	/**
+	 * Might not use it
+	 * @param year to be checked
+	 * @return true if it might be an year token
+	 */
+	public static boolean isYear2(String year){
+		
+		if (year.length() != 2)
+			return false;
+
+		char first = year.charAt(0);
+		if (first != '9' && first != '0')
+			return false;
+
+		return Character.isDigit(year.charAt(1));
 	}
 }
