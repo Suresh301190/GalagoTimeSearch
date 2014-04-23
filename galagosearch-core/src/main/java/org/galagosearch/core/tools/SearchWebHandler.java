@@ -267,7 +267,7 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("</table>\n");
         writer.append("</div>\n");
 
-        writer.append("<center>[<a href=\"#\" onClick=\"toggleDebug(); return false;\">debug</a>]</center>");
+        /*writer.append("<center>[<a href=\"#\" onClick=\"toggleDebug(); return false;\">debug</a>]</center>");
         writer.append("<div id=\"debug\">");
         writer.append("<table>");
         writer.append(String.format("<tr><td>%s</td><td>%s</td></tr>",
@@ -275,7 +275,7 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append(String.format("<tr><td>%s</td><td>%s</td></tr>",
                       "Transformed Query", result.transformedQuery.toString()));
         writer.append("</table>");
-        writer.append("</div>");
+        writer.append("</div>");*/
 
         for (SearchResultItem item : result.items) {
         	writer.append("<table style=\"width:100%\">");
@@ -393,7 +393,7 @@ public class SearchWebHandler extends AbstractHandler {
         writer.write("#result { padding: 10px 5px; max-width: 550px; solid #ccc;}\n");
         writer.write("#meta { font-size: small; color: rgb(60, 100, 60); }\n");
         writer.write("#summary { font-size: small; }\n");
-        writer.write("#dhtmltooltip{position: absolute;width: 150px;border: 2px solid black;padding: 2px;background-color: lightyellow;visibility: hidden;z-index: 100;");
+        writer.write("#dhtmltooltip{border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px; position: absolute;width: 150px;border: 2px solid black;padding: 2px;background-color: lightyellow;visibility: hidden;z-index: 100;");
         writer.write("#dhtmlpointer{position:absolute;left: -300px;z-index: 101;visibility: hidden;}");
         writer.write("#debug { display: none; }\n");
         writer.write("</style>");
@@ -409,9 +409,9 @@ public class SearchWebHandler extends AbstractHandler {
         //writeStyle(writer);
         writer.write("<style type=\"text/css\">\n");
     	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px;}");
-    	writer.write(".lighter {width:95%;	height:50px;padding:40px 25px;}");
+    	writer.write(".lighter {width:95%;	margin:25px; height:50px;padding:80px 55px;}");
     	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); color:#7da2aa;cursor: pointer;}");
-    	writer.write("body  { font-family: Helvetica, sans-serif;  background-image: url(/images/timeMachine1.jpg);background-size:cover;background-repeat: no-repeat; fixed; }\n");
+    	writer.write("body  { font-family: Helvetica, sans-serif;  background-image: url(/images/bigClock3.png);background-size:cover;background-repeat: no-repeat; fixed; }\n");
         writer.write("img { border-style: none; }\n");
         writer.write("#box { solid #ccc; margin: 0; display:inline-block; position:relative; }\n");
         writer.write("#header { background: rgb(210, 233, 217); border: 1px solid #ccc; }\n");
@@ -419,8 +419,8 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("<title>Galago Search</title></head>");
         writer.append("<body></a><br/>\n");
         
-        writer.append("<center><br/><br/><div id=\"lighter\" ></a><br/>\n");
-        writer.append("<form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"80\" style=\"height: 40px\" placeholder=\"Enter your query and start the time machine :p \"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 37px; width:80px\" ></span></form><br/><br/>");
+        writer.append("<center><br/><br/><br/><br/><br/><br/><div id=\"lighter\" style = \"margin-left: 80px;\" >\n");
+        writer.append("<form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"80\" style=\"height: 40px\" placeholder=\"Enter your query and start the time machine..\"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 37px; width:80px\" ></span></form><br/><br/>");
         writer.append("</div></center></body></html>\n");
         
         writer.close();
