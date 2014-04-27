@@ -1,23 +1,74 @@
 package org.galagosearch.core.parse;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 
 
-public class TimeTuple{
+public class TimeTuple implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 318681837648995451L;
+
 	Time tb_l, tb_u, te_l, te_u;
 	
-	int lastYear;
-	
-	public TimeTuple(){
+	static StringBuffer sb = new StringBuffer("0000000");
+	public TimeTuple() {
 		tb_l = new Time();
 		tb_u = new Time();
 		te_l = new Time();
 		te_u = new Time();
 	}
 
-	public int overlap(Time t){
+	public TimeTuple(String[] t) {
+		// TODO Auto-generated constructor stub
+		tb_l = new Time(t[0].split("-"));
+		tb_u = new Time(t[1].split("-"));
+		te_l = new Time(t[2].split("-"));
+		te_u = new Time(t[3].split("-"));
+	}
 
-		return 0;
+	/**
+	 * To find the P(Q|T) efficiently
+	 * @param key to retrieve Time info from index
+	 * @param Q Query Temporal info
+	 * @return the value of P(Q|T)
+	 * @throws IOException
+	 */
+	public static double overlap(String key, TimeTuple Q) throws IOException{
+		//System.out.println(key + " : " + Time.tReader.getValueString(key));
+		//System.out.println(Time._keys.contains(key));
+		//System.out.println(Time._Map.get(key));
+		
+		TimeWrap D = Time._Map.get(key);
+		System.out.println(D.timeFrame.toString());
+		double dr = abs(D.timeFrame)*abs(Q);
+		
+		double pQ_T = 0;// = intersection(D.timeFrame, Q);
+		pQ_T = pQ_T/dr;
+				
+		return 1.0;
+	}
+
+	/**
+	 * To compute the abs(T) efficiently
+	 * @param timeFrame to compute from
+	 * @return the abs value of Time Frame
+	 */
+	private static double abs(TimeTuple timeFrame) {
+		// TODO Auto-generated method stub
+		if(timeFrame.tb_u.compareTo(timeFrame.te_l) <= 0){
+			return (Time.abs(timeFrame.tb_u, timeFrame.tb_l) + 1)
+					* (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1);
+		}
+		
+		double ans = (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1);
+		
+		ans *= (Time.abs(timeFrame.te_l, timeFrame.tb_l) + 1)
+				+ Time.abs(timeFrame.tb_u, timeFrame.te_l)
+				- 0.5*(Time.abs(timeFrame.tb_u, timeFrame.tb_l));
+		return ans;
 	}
 
 	/**
@@ -30,7 +81,6 @@ public class TimeTuple{
 		document.timeFrame = new TimeTuple();
 		Time t = new Time();
 		
-		 
 		for (int i = 0; i < document.terms.size(); ++i) {
             String term = document.terms.get(i);
             
@@ -111,6 +161,13 @@ public class TimeTuple{
 				" tb_u : " + tb_u.toString() +
 				" te_l : " + te_l.toString() + 
 				" te_u : " + te_u.toString();
+	}
+	
+	public String toStore(){
+		return  tb_l.toString() +
+				":"+ tb_u.toString() +
+				":"+ te_l.toString() + 
+				":" + te_u.toString();
 	}
 
 	/**

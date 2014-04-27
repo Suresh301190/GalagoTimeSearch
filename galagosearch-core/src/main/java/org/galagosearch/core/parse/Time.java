@@ -3,15 +3,22 @@ package org.galagosearch.core.parse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import org.galagosearch.core.index.IndexElement;
 import org.galagosearch.core.index.IndexReader;
 import org.galagosearch.core.index.IndexWriter;
 
-public class Time implements Comparable<Time>{
+public class Time implements Comparable<Time>, Serializable{
 
-	private static final String index = "TimeIndex";
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5083703260990174416L;
+	public static final String index = "TimeIndex", TTIndex = "TimeTupleIndex";
 	/**
 	 * To write to Index File TImeIndex
 	 */
@@ -21,11 +28,43 @@ public class Time implements Comparable<Time>{
 	 * To read Index file TimeIndex
 	 */
 	public static IndexReader tReader;
+	
+	public static boolean isBuild = false, isSearch = false;
 	public static PrintStream ps;
+	
+	public static String path;
 
 	static HashMap<String, Integer> monthMap;
+	public static HashSet<String> _keys;
+	public static HashMap<String, TimeWrap> _Map;
+	
+	public static Map<String, String> _perfectMap;
 
 	int date, month, year;
+
+	public Time(){}
+	
+	/**
+	 * Parses the input string and extracts the time from it.
+	 * @param t
+	 */
+	public Time(String[] t) {
+		// TODO Auto-generated constructor stub
+		//System.out.println(t[0] +  " " + t[1] + " " + t[2]);
+		date = Integer.parseInt(t[0]);
+		month = Integer.parseInt(t[1]);
+		year = Integer.parseInt(t[2]);
+	}
+	
+	public static double abs(Time t1, Time t2){
+		double ans;
+		
+		ans = (double) 365*(t1.year - t2.year);
+		ans += 30*Math.abs(t1.month - t1.month) + Math.abs(t1.date - t2.date);
+		
+		return ans;
+	}
+
 
 	/**
 	 * To set the respective date, month, year mapping to 
@@ -34,15 +73,23 @@ public class Time implements Comparable<Time>{
 	 * @param out 
 	 */
 	public static void init(String args, boolean isBuild, OutputStream out){
-
+		Time.isBuild = isBuild;
+		Time.isSearch = !isBuild;
+		
 		try {
-			if(isBuild) tWriter = new IndexWriter(args + index);
-			if(!isBuild) tReader = new IndexReader(args + index);			
+			path = args;
+			if(isBuild) tWriter = new IndexWriter(path + index);
+			if(!isBuild) tReader = new IndexReader(path + index);			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("In Time Init take a look");
 			System.exit(-1);
 		}
+		if(isSearch){
+			_Map = new HashMap<String, TimeWrap>();
+			_keys = new HashSet<String>();
+		}
+		
 		ps = new PrintStream(out);
 		monthMap = new HashMap<String, Integer>();
 		monthMap.put("jan", 1);	monthMap.put("january", 1); 	monthMap.put("1", 1);
@@ -95,7 +142,7 @@ public class Time implements Comparable<Time>{
 	 * @return string representation of TimeFrame
 	 * @throws IOException
 	 */
-	public static String getTime(String key) throws IOException{
+	public static synchronized String getTime(String key) throws IOException{
 		return tReader.getValueString(key);
 	}
 

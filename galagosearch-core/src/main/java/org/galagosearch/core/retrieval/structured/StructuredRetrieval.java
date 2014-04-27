@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+
 import org.galagosearch.core.index.StructuredIndex;
+import org.galagosearch.core.parse.TimeTuple;
 import org.galagosearch.core.retrieval.query.Node;
 import org.galagosearch.core.retrieval.query.StructuredQuery;
 import org.galagosearch.core.retrieval.Retrieval;
 import org.galagosearch.core.retrieval.ScoredDocument;
 import org.galagosearch.core.retrieval.query.NodeType;
 import org.galagosearch.core.retrieval.query.Traversal;
+import org.galagosearch.core.tools.Search;
 import org.galagosearch.tupleflow.Parameters;
 
 /**
@@ -101,7 +104,9 @@ public class StructuredRetrieval extends Retrieval {
         while (!iterator.isDone()) {
             int document = iterator.nextCandidate();
             int length = index.getLength(document);
-            double score = iterator.score(document, length);
+            double score = iterator.score(document, length) 
+            		* TimeTuple.overlap(Search.getIdentifier.getDocumentName(document), 
+            				new TimeTuple());
 
             if (queue.size() <= requested || queue.peek().score < score) {
                 ScoredDocument scoredDocument = new ScoredDocument(document, score);

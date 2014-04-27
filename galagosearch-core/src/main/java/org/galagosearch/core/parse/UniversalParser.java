@@ -74,7 +74,6 @@ public class UniversalParser extends StandardStep<DocumentSplit, Document> {
 
 		DocumentStreamParser parser;
 
-		System.out.println();
 		if (split.fileType.equals("html") ||
 				split.fileType.equals("xml") ||
 				split.fileType.equals("txt")) {
@@ -98,13 +97,15 @@ public class UniversalParser extends StandardStep<DocumentSplit, Document> {
 			processor.process(document);
 			
 			// to add time info to Inverted List
-			Time.add(new GenericElement(document.identifier, document.publication.toString() + " | " + document.timeFrame.toString()));            
+			if(Time.isBuild){
+				Time.add(new GenericElement(document.identifier, document.publication.toString() + "#" + document.timeFrame.toStore()));            
+			}
 
 			if (documentCounter != null)
 				documentCounter.increment();
 		}
 		
-		Time.flush();
+		if(Time.isBuild) Time.flush();
 
 		if(baos != null){
 			baos.close();

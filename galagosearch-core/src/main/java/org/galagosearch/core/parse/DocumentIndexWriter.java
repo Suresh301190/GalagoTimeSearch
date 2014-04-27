@@ -35,7 +35,7 @@ public class DocumentIndexWriter implements Processor<Document> {
         Parameters p = new Parameters();
         p.add("isCompressed", "true");
         writer = new IndexWriter(parameters.getXML().get("filename"), p);
-        System.out.println(parameters.getXML().get("filename"));
+        //System.out.println(parameters.getXML().get("filename"));
         documentsWritten = parameters.getCounter("Documents Written");
     }
     

@@ -4,11 +4,13 @@ package org.galagosearch.core.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.galagosearch.core.parse.Document;
+import org.galagosearch.core.parse.TimeTuple;
 import org.galagosearch.core.retrieval.Retrieval;
 import org.galagosearch.core.retrieval.ScoredDocument;
 import org.galagosearch.core.retrieval.query.Node;
@@ -26,10 +28,12 @@ public class Search {
     SnippetGenerator generator;
     DocumentStore store;
     Retrieval retrieval;
+    public static Retrieval getIdentifier;
 
     public Search(Retrieval retrieval, DocumentStore store) {
         this.store = store;
         this.retrieval = retrieval;
+        getIdentifier = retrieval;
         generator = new SnippetGenerator();
     }
 
@@ -83,6 +87,10 @@ public class Search {
         Node tree = parseQuery(query, new Parameters());
         Node transformed = retrieval.transformQuery(tree);
         ScoredDocument[] results = retrieval.runQuery(transformed, startAt + count);
+        
+        addTime(results);
+        //Arrays.sort(results);
+        
         SearchResult result = new SearchResult();
         Set<String> queryTerms = StructuredQuery.findQueryTerms(tree);
         result.query = tree;
@@ -92,7 +100,7 @@ public class Search {
         for (int i = startAt; i < Math.min(startAt + count, results.length); i++) {
             String identifier = retrieval.getDocumentName(results[i].document);
             Document document = getDocument(identifier);
-            SearchResultItem item = new SearchResultItem();
+            SearchResultItem item = new SearchResultItem();          
 
             item.rank = i + 1;
             item.identifier = identifier;
@@ -121,4 +129,12 @@ public class Search {
 
         return result;
     }
+
+	private void addTime(ScoredDocument[] results) throws IOException {
+		// TODO Auto-generated method stub
+		for(int i=0; i<results.length; i++){
+			results[i].score = results[i].score*TimeTuple.overlap(
+					retrieval.getDocumentName(results[i].document), new TimeTuple());
+		}
+	}
 }
