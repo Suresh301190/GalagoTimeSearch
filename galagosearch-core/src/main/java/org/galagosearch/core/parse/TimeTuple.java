@@ -10,6 +10,13 @@ public class TimeTuple implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 318681837648995451L;
+	
+	public static TimeTuple qTF;
+	private static double q_abs = 1;
+	
+	public static void Q_abs(){
+		q_abs = abs(qTF);
+	}
 
 	Time tb_l, tb_u, te_l, te_u;
 	
@@ -36,21 +43,37 @@ public class TimeTuple implements Serializable{
 	 * @return the value of P(Q|T)
 	 * @throws IOException
 	 */
-	public static double overlap(String key, TimeTuple Q) throws IOException{
+	public static double overlap(String key) throws IOException{
 		//System.out.println(key + " : " + Time.tReader.getValueString(key));
 		//System.out.println(Time._keys.contains(key));
 		//System.out.println(Time._Map.get(key));
+		TimeWrap D;
+		//*
+		if((D = Time._Map.get(key)) == null){
+			D = new TimeWrap();return 1.0;
+		}
+		else{
+			return 1.0;
+		}
+		//*/
+		//System.out.println(D.timeFrame.toString());
+		//double dr = (Time.abs_T[Integer.parseInt(key) - Time.min] + 0.5)*q_abs;
 		
-		/*
-		TimeWrap D = Time._Map.get(key);
-		System.out.println(D.timeFrame.toString());
-		double dr = abs(D.timeFrame)*abs(Q);
-		
-		double pQ_T = 0;// = intersection(D.timeFrame, Q);
-		pQ_T = pQ_T/dr;
+		//double pQ_T = intersection(D.timeFrame, qTF)/dr;
 			
 		//*/
-		return 1.0;
+		//return 1/pQ_T;
+	}
+
+	private static double intersection(TimeTuple tf, TimeTuple q) {
+		// TODO Auto-generated method stub
+		TimeTuple in = new TimeTuple();
+		in.tb_l = tf.tb_l.compareTo(q.tb_l)>0?tf.tb_l:q.tb_l;
+		in.tb_l = tf.tb_u.compareTo(q.tb_u)<0?tf.tb_u:q.tb_u;
+		in.tb_l = tf.te_l.compareTo(q.te_l)>0?tf.te_l:q.te_l;
+		in.tb_l = tf.te_u.compareTo(q.te_u)<0?tf.te_u:q.te_u;
+		
+		return abs(in);
 	}
 
 	/**

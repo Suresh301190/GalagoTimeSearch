@@ -317,9 +317,9 @@ public class App {
 			Time.abs_T =  (double[]) ois.readObject();
 			ois.close();
 			
-			/*
-			PrintStream writer = new PrintStream(new File(Time.path + "/Dump"));
-	        for(Map.Entry<String, TimeTuple> iter : Time._Map.entrySet()){
+			//*
+			PrintStream writer = new PrintStream(new File(Time.path + "/DumpMap"));
+	        for(Map.Entry<String, TimeWrap> iter : Time._Map.entrySet()){
 	        	writer.println(iter.getKey() + iter.getValue().toString());
 	        }
 	        writer.flush(); writer.close();

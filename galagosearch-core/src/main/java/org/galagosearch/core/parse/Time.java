@@ -48,7 +48,7 @@ public class Time implements Comparable<Time>, Serializable{
 	
 	public static Map<String, String> _perfectMap;
 
-	int date, month, year;
+	int date = 0, month = 0, year = 0;
 	
 	public static double[] abs_T;
 

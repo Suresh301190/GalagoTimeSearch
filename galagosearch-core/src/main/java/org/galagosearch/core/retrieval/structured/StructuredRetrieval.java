@@ -107,7 +107,7 @@ public class StructuredRetrieval extends Retrieval {
             int length = index.getLength(document);
             //System.out.println(document + ":" + Integer.parseInt(Search.getIdentifier.getDocumentName(document)) + ":" + Time.abs_T[Integer.parseInt(Search.getIdentifier.getDocumentName(document))]);
             double score = iterator.score(document, length)
-            		* TimeTuple.overlap(Search.getIdentifier.getDocumentName(document),	new TimeTuple());
+            		* TimeTuple.overlap(Search.getIdentifier.getDocumentName(document));
 
             if (queue.size() <= requested || queue.peek().score < score) {
                 ScoredDocument scoredDocument = new ScoredDocument(document, score);

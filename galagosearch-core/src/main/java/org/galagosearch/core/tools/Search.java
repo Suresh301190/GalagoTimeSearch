@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.galagosearch.core.parse.Document;
+import org.galagosearch.core.parse.TagTokenizer;
 import org.galagosearch.core.parse.Time;
 import org.galagosearch.core.parse.TimeTuple;
 import org.galagosearch.core.retrieval.Retrieval;
@@ -85,6 +86,10 @@ public class Search {
     }
 
     public SearchResult runQuery(String query, int startAt, int count, boolean summarize) throws Exception {
+    	Document doc = new TagTokenizer().tokenize(query);
+    	TimeTuple.setTimeFrame(doc);
+    	TimeTuple.qTF = doc.timeFrame;
+    	
         Node tree = parseQuery(query, new Parameters());
         Node transformed = retrieval.transformQuery(tree);
         ScoredDocument[] results = retrieval.runQuery(transformed, startAt + count);
@@ -108,6 +113,9 @@ public class Search {
             item.displayTitle = identifier;
             if(Time._Map.get(identifier) != null){
             	item.publication = Time._Map.get(identifier).publication;
+            }
+            else{
+            	item.publication = new Time();
             }
 
             if (document.metadata.containsKey("title")) {
@@ -139,7 +147,7 @@ public class Search {
 		// TODO Auto-generated method stub
 		for(int i=0; i<results.length; i++){
 			results[i].score = results[i].score*TimeTuple.overlap(
-					retrieval.getDocumentName(results[i].document), new TimeTuple());
+					retrieval.getDocumentName(results[i].document));
 		}
 	}
 }
