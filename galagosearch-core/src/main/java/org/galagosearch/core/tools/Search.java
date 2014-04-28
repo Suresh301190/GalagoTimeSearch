@@ -4,12 +4,12 @@ package org.galagosearch.core.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.galagosearch.core.parse.Document;
+import org.galagosearch.core.parse.Time;
 import org.galagosearch.core.parse.TimeTuple;
 import org.galagosearch.core.retrieval.Retrieval;
 import org.galagosearch.core.retrieval.ScoredDocument;
@@ -53,6 +53,7 @@ public class Search {
         public String identifier;
         public String displayTitle;
         public String url;
+        public Time publication; 
         public Map<String, String> metadata;
         public String summary;
     }
@@ -105,6 +106,9 @@ public class Search {
             item.rank = i + 1;
             item.identifier = identifier;
             item.displayTitle = identifier;
+            if(Time._Map.get(identifier) != null){
+            	item.publication = Time._Map.get(identifier).publication;
+            }
 
             if (document.metadata.containsKey("title")) {
                 item.displayTitle = document.metadata.get("title");
@@ -121,6 +125,7 @@ public class Search {
             if (summarize) {
                 item.summary = getSummary(document, queryTerms);
             }
+            
             //System.out.println(results[i].score);
 
             item.metadata = document.metadata;
