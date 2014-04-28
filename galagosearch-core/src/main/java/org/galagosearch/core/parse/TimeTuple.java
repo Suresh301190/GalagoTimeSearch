@@ -41,13 +41,15 @@ public class TimeTuple implements Serializable{
 		//System.out.println(Time._keys.contains(key));
 		//System.out.println(Time._Map.get(key));
 		
+		/*
 		TimeWrap D = Time._Map.get(key);
 		System.out.println(D.timeFrame.toString());
 		double dr = abs(D.timeFrame)*abs(Q);
 		
 		double pQ_T = 0;// = intersection(D.timeFrame, Q);
 		pQ_T = pQ_T/dr;
-				
+			
+		//*/
 		return 1.0;
 	}
 
@@ -56,7 +58,7 @@ public class TimeTuple implements Serializable{
 	 * @param timeFrame to compute from
 	 * @return the abs value of Time Frame
 	 */
-	private static double abs(TimeTuple timeFrame) {
+	public static double abs(TimeTuple timeFrame) {
 		// TODO Auto-generated method stub
 		if(timeFrame.tb_u.compareTo(timeFrame.te_l) <= 0){
 			return (Time.abs(timeFrame.tb_u, timeFrame.tb_l) + 1)

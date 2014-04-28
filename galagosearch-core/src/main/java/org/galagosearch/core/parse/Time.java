@@ -1,5 +1,6 @@
 package org.galagosearch.core.parse;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -18,7 +19,7 @@ public class Time implements Comparable<Time>, Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -5083703260990174416L;
-	public static final String index = "TimeIndex", TTIndex = "TimeTupleIndex";
+	public static final String index = "TimeIndex", TTIndex = "TimeTupleIndex", Tabs ="TimeABS";
 	/**
 	 * To write to Index File TImeIndex
 	 */
@@ -29,10 +30,17 @@ public class Time implements Comparable<Time>, Serializable{
 	 */
 	public static IndexReader tReader;
 	
+	public static int min;
+	
 	public static boolean isBuild = false, isSearch = false;
 	public static PrintStream ps;
 	
 	public static String path;
+	
+	/**
+	 * To check for existence of Temporal Index files
+	 */
+	public static File f_Time, f_Abs; 
 
 	static HashMap<String, Integer> monthMap;
 	public static HashSet<String> _keys;
@@ -41,6 +49,8 @@ public class Time implements Comparable<Time>, Serializable{
 	public static Map<String, String> _perfectMap;
 
 	int date, month, year;
+	
+	public static double[] abs_T;
 
 	public Time(){}
 	
@@ -78,6 +88,9 @@ public class Time implements Comparable<Time>, Serializable{
 		
 		try {
 			path = args;
+			f_Time = new File(path + TTIndex);
+			f_Abs = new File(path + Tabs);
+			
 			if(isBuild) tWriter = new IndexWriter(path + index);
 			if(!isBuild) tReader = new IndexReader(path + index);			
 		} catch (Exception e) {

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import org.galagosearch.core.index.StructuredIndex;
+import org.galagosearch.core.parse.Time;
 import org.galagosearch.core.parse.TimeTuple;
 import org.galagosearch.core.retrieval.query.Node;
 import org.galagosearch.core.retrieval.query.StructuredQuery;
@@ -104,9 +105,9 @@ public class StructuredRetrieval extends Retrieval {
         while (!iterator.isDone()) {
             int document = iterator.nextCandidate();
             int length = index.getLength(document);
-            double score = iterator.score(document, length) 
-            		* TimeTuple.overlap(Search.getIdentifier.getDocumentName(document), 
-            				new TimeTuple());
+            //System.out.println(document + ":" + Integer.parseInt(Search.getIdentifier.getDocumentName(document)) + ":" + Time.abs_T[Integer.parseInt(Search.getIdentifier.getDocumentName(document))]);
+            double score = iterator.score(document, length)
+            		* TimeTuple.overlap(Search.getIdentifier.getDocumentName(document),	new TimeTuple());
 
             if (queue.size() <= requested || queue.peek().score < score) {
                 ScoredDocument scoredDocument = new ScoredDocument(document, score);
@@ -116,7 +117,6 @@ public class StructuredRetrieval extends Retrieval {
                     queue.poll();
                 }
             }
-
             iterator.movePast(document);
         }
 

@@ -121,7 +121,7 @@ public class Search {
             if (summarize) {
                 item.summary = getSummary(document, queryTerms);
             }
-            System.out.println(results[i].score);
+            //System.out.println(results[i].score);
 
             item.metadata = document.metadata;
             result.items.add(item);
