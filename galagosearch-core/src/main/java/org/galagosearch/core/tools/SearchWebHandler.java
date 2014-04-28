@@ -198,6 +198,7 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("}\n");
         writer.append("</script>\n");
         writer.append("</head>\n<body>\n");
+        writer.append("<script type=\"text/javascript\" language=\"JavaScript1.2\">if (document.all||document.getElementById)document.body.style.background=\"url('/images/MainLogo1.png') white center no-repeat fixed\"</script>");
         writer.append("<div id=\"dhtmltooltip\"></div>\n"+
 
 "<script type=\"text/javascript\">\n"+
@@ -261,7 +262,7 @@ public class SearchWebHandler extends AbstractHandler {
 "</script> \n");
         writer.append("<div id=\"header\">\n");
         writer.append("<table ><tr >");
-        writer.append("<td width=\"15%\"><a href=\"http://www.galagosearch.org\">" +"<img src=\"/images/galago.png\" width=\"100%\"></a></td>");
+        writer.append("<td width=\"15%\"><a href=\"http://www.galagosearch.org\">" +"<img src=\"/images/MainLogo4.png\" width=\"100%\"></a></td>");
         writer.append("<td width=\"85%\"><br/><form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"70\" style=\"height: 30px\"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 27px; width:80px\" ></form></td>");
         writer.append("</tr>");
         writer.append("</table>\n");
@@ -283,12 +284,13 @@ public class SearchWebHandler extends AbstractHandler {
         	writer.append("<td width=\"15%\"></td>\n");
         	writer.append("<td width=\"55%\" >\n");
         	//String s=item.summary;
-            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n",item.summary));
+            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n",item.displayTitle));
             writer.append(String.format("<a href=\"document?identifier=%s\">%s</a><br/>" +
                                         "<div id=\"meta\">%s - %s</div>\n",
                                         item.identifier,
                                         item.displayTitle,
                                         item.summary,
+                                        item.displayTitle,
                                         scrub(item.identifier),
                                         scrub(item.url)));
             writer.append("</div>\n");
@@ -381,19 +383,19 @@ public class SearchWebHandler extends AbstractHandler {
     	writer.write("<style type=\"text/css\">\n");
     	writer.write(".highlight { background-color: #C0C0C0 }");
     	writer.write("body  { font-family: Helvetica, sans-serif;}\n");
-    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px;}");
-    	writer.write(".lighter {width:95%;	height:50px;padding:40px 25px;}");
-    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); color:#7da2aa;cursor: pointer;}");
+    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px; background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);  -webkit-border-radius:15px;}");
+    	writer.write(".lighter {width:95%;	height:50px;padding:40px 25px; }");
+    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #39C63A 0%,#708F70 100%); color:#72aa;cursor: pointer;}");
         writer.write("img { border-style: none; }\n");
         writer.write("#box { solid #ccc; margin: 10px auto; width: 500px;\" }\n");
         writer.write("#box a { font-size: small; text-decoration: none; }\n");
         writer.write("#box a:link { color: rgb(0, 93, 40); }\n");
         writer.write("#box a:visited { color: rgb(90, 93, 90); }\n");
-        writer.write("#header { background: rgb(210, 233, 217); border: 1px solid #ccc; }\n");
+        writer.write("#header { background: rgb(0, 0, 0); border: 1px solid #ccc; }\n");
         writer.write("#result { padding: 10px 5px; max-width: 550px; solid #ccc;}\n");
         writer.write("#meta { font-size: small; color: rgb(60, 100, 60); }\n");
         writer.write("#summary { font-size: small; }\n");
-        writer.write("#dhtmltooltip{border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px; position: absolute;width: 150px;border: 2px solid black;padding: 2px;background-color: lightyellow;visibility: hidden;z-index: 100;");
+        writer.write("#dhtmltooltip{border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px; position: absolute;width: 150px;border: 2px solid black;padding: 2px;background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);visibility: hidden;z-index: 100;");
         writer.write("#dhtmlpointer{position:absolute;left: -300px;z-index: 101;visibility: hidden;}");
         writer.write("#debug { display: none; }\n");
         writer.write("</style>");
@@ -408,18 +410,19 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("<head>\n");
         //writeStyle(writer);
         writer.write("<style type=\"text/css\">\n");
-    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px;-webkit-border-radius:15px;}");
+    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px; background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);-webkit-border-radius:15px;}");
     	writer.write(".lighter {width:95%;	margin:25px; height:50px;padding:80px 55px;}");
-    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); color:#7da2aa;cursor: pointer;}");
-    	writer.write("body  { font-family: Helvetica, sans-serif;  background-image: url(/images/bigClock3.png);background-size:cover;background-repeat: no-repeat; fixed; }\n");
+    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #39C63A 0%,#708F70 100%); color:#72aa;cursor: pointer;}");
+    	writer.write("html {background: url(/images/NYT1.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}");
+    	writer.write("body  { font-family: Helvetica, sans-serif; background-size:cover;background-repeat: no-repeat; fixed; }\n");
         writer.write("img { border-style: none; }\n");
         writer.write("#box { solid #ccc; margin: 0; display:inline-block; position:relative; }\n");
         writer.write("#header { background: rgb(210, 233, 217); border: 1px solid #ccc; }\n");
         writer.write("</style>");
-        writer.append("<title>Galago Search</title></head>");
+        writer.append("<title><FONT COLOR=\"00FF00\">Chronons</FONT></title></head>");
         writer.append("<body></a><br/>\n");
         
-        writer.append("<center><br/><br/><br/><br/><br/><br/><div id=\"lighter\" style = \"margin-left: 80px;\" >\n");
+        writer.append("<center><br/><br/><div id=\"lighter\" style = \"margin-left: 0px;\" >\n");
         writer.append("<form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"80\" style=\"height: 40px\" placeholder=\"Enter your query and start the time machine..\"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 37px; width:80px\" ></span></form><br/><br/>");
         writer.append("</div></center></body></html>\n");
         
