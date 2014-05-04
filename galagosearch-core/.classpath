@@ -24,5 +24,8 @@
 			<attribute name="javadoc_location" value="file:/home/ocean/Desktop/anarres-jperf-bin-1.0.0/docs/api/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="src/main/resources/lib/rita.jar"/>
+	<classpathentry kind="lib" path="src/main/resources/lib/rita.support.jar"/>
+	<classpathentry kind="lib" path="src/main/resources/lib/core.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

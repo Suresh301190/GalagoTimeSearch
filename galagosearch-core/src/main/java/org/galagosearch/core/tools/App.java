@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -362,6 +363,7 @@ public class App {
 			}
 			writer.flush();
 			writer.close();
+			MappedByteBuffer mbb;
 			/*
 
         	Time._perfectMap = pMap.toMap();
