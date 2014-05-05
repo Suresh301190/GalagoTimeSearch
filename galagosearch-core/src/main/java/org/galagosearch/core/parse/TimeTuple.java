@@ -3,10 +3,10 @@ package org.galagosearch.core.parse;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-
-import javax.print.Doc;
 
 
 public class TimeTuple implements Serializable{
@@ -17,17 +17,16 @@ public class TimeTuple implements Serializable{
 
 	public static TimeTuple qTF;
 	private static double q_abs = 1;
-	private static final double _defABS;
-
 	public static void Q_abs(){
 		q_abs = abs(qTF);
+		System.out.println(q_abs);
 	}
 
 	public Time tb_l, tb_u, te_l, te_u;
 	static final TimeTuple _defTimeFrame;
 	static{
 		_defTimeFrame = new TimeTuple("1-1-1900:31-12-1900:1-1-2015:31-12-2015".split(":"));
-		System.out.println(_defABS = abs(_defTimeFrame));
+		//System.out.println(abs(_defTimeFrame));
 	}
 	boolean hasFrame = false;
 
@@ -46,25 +45,33 @@ public class TimeTuple implements Serializable{
 		te_l = new Time(t[2].split("-"));
 		te_u = new Time(t[3].split("-"));
 	}
-	
+
 	private TimeTuple(Time t, Time pub){
+		te_u = new Time();
+		te_l = new Time();
+		tb_u = new Time();
+		tb_l = new Time();
 		if(t.year == 0){
-			t.year = pub.year;
+			tb_u.year = tb_l.year = te_u.year = te_l.year = pub.year;
 		}
-		te_u = te_l = tb_u = tb_l = t;
-		
-		if(tb_l.month == 0){
+		else tb_u.year = tb_l.year = te_u.year = te_l.year = t.year;
+
+		if(t.month == 0){
 			tb_l.month = 1;
 			tb_u.month = 12;
 			te_l.month = 1;
 			te_u.month = 12;
 		}
-		if(tb_l.date == 0){
+		else{
+			tb_l.month = tb_u.month = te_l.month = te_u.month = t.month;
+		}
+		if(t.date == 0){
 			tb_l.date = 1;
 			tb_u.date = 30;
 			te_l.date = 1;
 			te_u.date = 30;
 		}
+		else tb_l.date =tb_u.date = te_l.date =	te_u.date = t.date;
 	}
 
 	/**
@@ -75,41 +82,30 @@ public class TimeTuple implements Serializable{
 	 * @throws IOException
 	 */
 	public static double overlap(String key) throws IOException{
-		//System.out.println(key + " : " + Time.tReader.getValueString(key));
-		//System.out.println(Time._keys.contains(key));
-		//System.out.println(Time._Map.get(key));
-		TimeWrap D;
-		/*
-		if((D = Time._perfectMap.get(key)) == null){
-			D = new TimeWrap(_defTimeFrame);
-			return 100;
-			//System.out.println(key);
+	
+		TimeWrap D = Time.getTimeWrap(key);
+		if(D == null){
+			//System.out.println(key + " -- > null");
+			//return 1000;
 		}
 		else{
-			if(check(D.timeFrame.tb_l)){
-				D.timeFrame = _defTimeFrame;
-			}
-			//System.out.println(D.timeFrame.toString());
+			Time.qlog.println(key);
+			return -sumP_Q_T(D);
+			//return 1.0;
 		}
-		//*/
-		Entry<String, TimeWrap> en = Time._perfectMap.floorEntry(key);
-		if(en != null){
-			D = en.getValue();
-			if(check(D.timeFrame.tb_l)){
-				D.timeFrame.update(new Time(("0-0-" + D.publication.year).split("-")));
-				D.absT = abs(D.timeFrame);
-			}
-			double dr = 1.0 * D.absT*q_abs;
-			double pQ_T;
-			if((pQ_T = (intersection(D.timeFrame, qTF))) == -1){
-				return 1000;
-			}
-			//System.out.println(D.timeFrame.toString() + "\n" + intersection(D.timeFrame, qTF) + " " + dr + " : " + pQ_T);
-			return pQ_T/dr;
-		}
+		return 1;
+	}
 
-		return 100;
-		//*/
+	private static double sumP_Q_T(TimeWrap d) {
+		// TODO Auto-generated method stub
+		double sum = 1.0;
+		//System.out.println(d.timeTuples.toString());
+		for(TimeTuple tup:d.timeTuples){
+			sum = sum + intersection(tup, qTF)/(abs(tup) * q_abs);
+		}	
+		sum /= abs(d.timeFrame);
+		Time.qlog.println((1 + sum) + "\n");
+		return (1 + sum);
 	}
 
 	public static boolean check(Time t) {
@@ -119,43 +115,37 @@ public class TimeTuple implements Serializable{
 
 	private static double intersection(TimeTuple tf, TimeTuple q) {
 		// TODO Auto-generated method stub
-
-		if(tf.te_u.compareTo(q.tb_l) < 0 || q.te_u.compareTo(tf.tb_l) < 0){
-			return -1;
+		
+		/*
+		System.out.println("T : " + tf.toString());
+		System.out.println("Q : " + q.toString() + "\n");
+		//*/
+		/*
+		if(tf.tb_u.compareTo(q.tb_l) < 0 
+				|| q.tb_u.compareTo(tf.tb_l) < 0
+				|| tf.te_u.compareTo(q.te_l) < 0
+				|| tf.te_l.compareTo(q.te_u) < 0){
+			return 0;
 		}
-		else{
+		else/**/{
 			TimeTuple in = new TimeTuple();
 			in.tb_l = tf.tb_l.compareTo(q.tb_l)>0?tf.tb_l:q.tb_l;
 			in.tb_u = tf.tb_u.compareTo(q.tb_u)<0?tf.tb_u:q.tb_u;
-
-			if(in.tb_l.compareTo(in.tb_u) > 0){
-				in.tb_u = tf.tb_u.compareTo(q.tb_u)>0?tf.tb_u:q.tb_u;
-			}
 			in.te_l = tf.te_l.compareTo(q.te_l)>0?tf.te_l:q.te_l;
 			in.te_u = tf.te_u.compareTo(q.te_u)<0?tf.te_u:q.te_u;
 
-			if(in.te_l.compareTo(in.te_u) > 0){
-				in.te_l = tf.te_l.compareTo(q.te_l)<0?tf.te_l:q.te_l;
+			if(in.tb_l.compareTo(in.tb_u) > 0 || in.te_l.compareTo(in.te_u) > 0){
+				return 0;
 			}
-
-			System.out.println(tf.toString());
-			System.out.println(q.toString());
-			System.out.println(in.toString());
-
-			System.out.println("\n");
-			
-			
+			//*
+			Time.qlog.println("T : " + tf.toString());
+			Time.qlog.println("Q : " + q.toString());
+			Time.qlog.println("F : " + in.toString());
+			Time.qlog.println(abs(in));
+			//*/
 
 			return (abs(in));
 		}
-	}
-
-	private static boolean overlapExists(TimeTuple tf, TimeTuple q) {
-		// TODO Auto-generated method stub
-		if(tf.te_u.compareTo(q.tb_l) <= 0 || q.te_u.compareTo(tf.tb_l) < 0){
-
-		}
-		return false;
 	}
 
 	/**
@@ -166,17 +156,22 @@ public class TimeTuple implements Serializable{
 	public static double abs(TimeTuple timeFrame) {
 		// TODO Auto-generated method stub
 		if(timeFrame.tb_u.compareTo(timeFrame.te_l) <= 0){
-			return Math.abs((Time.abs(timeFrame.tb_u, timeFrame.tb_l) + 1)
+			return ((Time.abs(timeFrame.tb_u, timeFrame.tb_l) + 1)
 					* (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1));
 		}
 
 		double ans = (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1)
-				*((Time.abs(timeFrame.te_l, timeFrame.tb_l) + 1) + Time.abs(timeFrame.tb_u, timeFrame.te_l));
+				*((Time.abs(timeFrame.te_l, timeFrame.tb_l) + 1) 
+						+ Time.abs(timeFrame.tb_u, timeFrame.te_l));
 
 		ans -= 0.5*(Time.abs(timeFrame.tb_u, timeFrame.te_l)) 
 				* (Time.abs(timeFrame.tb_u, timeFrame.te_l) + 1);
 		return Math.abs(ans);
 	}
+
+	private static HashSet<Integer> ctmp;
+
+	private static	HashMap<Integer, HashSet<Integer>> check = new HashMap<Integer, HashSet<Integer>>();
 
 	/**
 	 * Extracts the time information from the document and 
@@ -188,16 +183,20 @@ public class TimeTuple implements Serializable{
 		document.timeFrame = new TimeTuple();
 		document.T = new ArrayList<TimeTuple>();
 		Time t = new Time();
-		
+		check.clear();
 		int counter = 0;
 
 		for (int i = 0; i < document.terms.size(); ++i) {
 			String term = document.terms.get(i);
 
+			if(isQuery && stopWords.contains(term)){
+				document.terms.remove(i--);
+			}
 			if (isYear(term)) {
 				t.year = Integer.parseInt(term);
 				t.month = getMonth(document.terms, i);
 				t.date = getDate(document.terms, i);
+				
 				document.timeFrame.hasFrame = true;
 				document.timeFrame.update(t);
 				addTuple(document, t);
@@ -212,23 +211,45 @@ public class TimeTuple implements Serializable{
 				t.date = getDate(document.terms, i);
 				document.timeFrame.hasFrame = true;
 				if(t.year != 0) document.timeFrame.update(t);
-				
+
 				if(Math.abs(counter - i) > 1){
 					addTuple(document, t);
 				}
-				
+
 				if(isQuery){
-					document.terms.remove(i);
-					--i;
+					document.terms.remove(i--);
 				}
 			}
 		}
-		
-		System.out.println(document.T.toString());
+
+		/*
+		System.out.println(document.T.toString() + " \n " + check.toString());
+		for(Entry<Integer, HashSet<Integer>> c:check.entrySet()){
+			System.out.println(c.getKey() + " : " + c.getValue().toString());
+		}
+		//*/
 	}
+
+	
 	
 	private static synchronized void addTuple(Document document, Time t){
-		document.T.add(new TimeTuple(t, document.publication));
+		//System.out.println(t.toString() +" : "+ document.publication.toString());
+		if((ctmp = check.get(t.year)) != null){
+			
+			if(!ctmp.contains(t.month) || t.year == 0){
+				//System.out.println(t.toString() +" : "+ document.publication.toString());
+				document.T.add(new TimeTuple(t, document.publication));
+				ctmp.add(t.month);
+			}
+		}
+		else{
+			//System.out.println(t.toString() +" : "+ document.publication.toString());
+			document.T.add(new TimeTuple(t, document.publication));
+			HashSet<Integer> set = new HashSet<Integer>();
+			if(t.month != 0) set.add(t.month);
+			check.put(t.year, set);
+		}
+
 	}
 
 	private void update(Time t) {
@@ -283,7 +304,7 @@ public class TimeTuple implements Serializable{
 	private static boolean isDate(String term) {
 		// TODO Auto-generated method stub
 
-		if(term.length() > 2 || !term.matches("[0-9]+")) return false;
+		if(term.length() > 2 || term.charAt(0) > '3' || !term.matches("[0-9]+")) return false;
 		else return true;
 	}
 
@@ -365,6 +386,31 @@ public class TimeTuple implements Serializable{
 
 		return Character.isDigit(year.charAt(1));
 	}
-	
+
 	StringBuffer sbTuple = new StringBuffer();
+	
+	static final HashSet<String> stopWords = 
+			new HashSet<String>(Arrays.asList("i'm","you're","he's","she's","it's","we're",
+					"they're","i've","you've","we've","they've","i'd","you'd","he'd","she'd",
+					"we'd","they'd","i'll","you'll","he'll","she'll","we'll","they'll","isn't",
+					"aren't","wasn't","weren't","hasn't","haven't","hadn't","doesn't","don't",
+					"didn't","won't","wouldn't","shan't","shouldn't","can't","cannot","couldn't",
+					"mustn't","let's","that's","who's","what's","here's","there's","when's",
+					"where's","why's","how's","a","an","the","i","me","my","myself","we","us",
+					"our","ours","ourselves","you","your","yours","yourself","yourselves","he","him","his",
+					"himself","she","her","hers","herself","it","its","itself","they","them",
+					"their","theirs","themselves","what","which","who","whom","this","that",
+					"these","those","am","is","are","was","were","be","been","being","have",
+					"has","had","having","do","does","did","doing","will","would","shall",
+					"should","can2","could","may","might","must","ought","and","but","if","or","because","as","until",
+					"while","of","at","by","for","with","about","against","between","into",
+					"through","during","before","after","above","below","to","from","up",
+					"down","in","out","on","off","over","under","again","further","then",
+					"once","here","there","when","where","why","how","all","any","both",
+					"each","few","more","most","other","some","such","no","nor","not",
+					"only","own","same","so","than","too","very","one","every","least","less","many","now",
+					"ever","never","say","says","said","also","get","go","goes","just",
+					"made","make","put","see","seen","whether","like","well","back",
+					"even","still","way","take","since","another","however","two",
+					"three","four","five","first","second","new","old","high","long"));
 }

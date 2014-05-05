@@ -1,20 +1,28 @@
 package org.galagosearch.core.parse;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.galagosearch.core.index.GenericElement;
 import org.galagosearch.core.index.IndexElement;
 import org.galagosearch.core.index.IndexReader;
 import org.galagosearch.core.index.IndexWriter;
+import org.galagosearch.tupleflow.Utility;
 
 public class Time implements Comparable<Time>, Serializable{
 
@@ -32,14 +40,14 @@ public class Time implements Comparable<Time>, Serializable{
 	 * To read Index file TimeIndex
 	 */
 	public static IndexReader tReader, t_Doc_Reader;
-	
-	public static int min;
-	
+
+	public static int min, count = 0;
+
 	public static boolean isBuild = false, isSearch = false;
 	public static PrintStream ps;
-	
+
 	public static String path;
-	
+
 	/**
 	 * To check for existence of Temporal Index files
 	 */
@@ -48,19 +56,23 @@ public class Time implements Comparable<Time>, Serializable{
 	static HashMap<String, Integer> monthMap;
 	public static HashSet<String> _keys;
 	public static HashMap<String, TimeWrap> _Map;
-	
+
 	public static TreeMap<String, TimeWrap> _perfectMap;
+	public static TreeMap<String, TimeWrap> _perfectTuples;
+
+	public static HashMap<String, Integer> keyValuePair;
+	public static RandomAccessFile valueFile;
 
 	int date = 0, month = 0, year = 0;
-	
+
 	public static double[] abs_T;
-	
-	public static int counter = 0;
+
+	public static int counter = 0, offset;
 
 	public Time(){}
-	
-	public static PrintStream qFos;
-	
+
+	public static PrintStream qFos, qlog;
+
 	/**
 	 * Parses the input string and extracts the time from it.
 	 * @param t
@@ -72,14 +84,14 @@ public class Time implements Comparable<Time>, Serializable{
 		month = Integer.parseInt(t[1]);
 		year = Integer.parseInt(t[2]);
 	}
-	
+
 	public static double abs(Time t1, Time t2){
 		double ans;
-		
+
 		ans = (double) 365*(t1.year - t2.year);
 		ans += 30*(t1.month - t1.month) + (t1.date - t2.date);
-		
-		return ans;
+
+		return Math.abs(ans);
 	}
 
 
@@ -92,20 +104,29 @@ public class Time implements Comparable<Time>, Serializable{
 	public static void init(String args, boolean isBuild, OutputStream out){
 		Time.isBuild = isBuild;
 		Time.isSearch = !isBuild;
-		
+
 		try {
-			qFos = new PrintStream(new File("/home/ocean/Desktop/QueryDump.txt"));
+			//qFos = new PrintStream(new File("/home/ocean/Desktop/QueryDump.txt"));
 			path = args;
 			f_Time = new File(path + TTIndex);
 			f_Abs = new File(path + Tabs);
-			
+			File file = new File(path + "/values");
+			file.mkdir();
+			System.out.println(path);
+			valueFile = new RandomAccessFile(path + "/values", "rw");
+
 			if(isBuild) {
+				keyValuePair = new HashMap<String, Integer>();
+				offset = 0;
 				tWriter = new IndexWriter(path + index);
 				t_Doc_Writer = new IndexWriter(path + "/TuplesTime");
 			}
-			if(!isBuild){
-				tReader = new IndexReader(path + index);
-				t_Doc_Reader = new IndexReader(path + "/TuplesTime");
+			if(isSearch){
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path + "/keyIndex"));
+				keyValuePair = (HashMap<String, Integer>) ois.readObject();
+				ois.close();
+				//tReader = new IndexReader(path + index);
+				//t_Doc_Reader = new IndexReader(path + "/TuplesTime");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -115,8 +136,9 @@ public class Time implements Comparable<Time>, Serializable{
 		if(isSearch){
 			_Map = new HashMap<String, TimeWrap>();
 			_keys = new HashSet<String>();
+
 		}
-		
+
 		ps = new PrintStream(out);
 		monthMap = new HashMap<String, Integer>();
 		monthMap.put("jan", 1);	monthMap.put("january", 1); 	
@@ -131,7 +153,7 @@ public class Time implements Comparable<Time>, Serializable{
 		monthMap.put("oct", 10);monthMap.put("october", 10);	
 		monthMap.put("nov", 11);monthMap.put("november", 11);	
 		monthMap.put("dec", 12);monthMap.put("december", 12);	
-		
+
 		monthMap.put("Jan", 1);	monthMap.put("January", 1); 	
 		monthMap.put("Feb", 2); monthMap.put("February", 2);	
 		monthMap.put("Mar", 3); monthMap.put("March", 3);		
@@ -156,16 +178,88 @@ public class Time implements Comparable<Time>, Serializable{
 	 * adds a Index Element to TimeInvertedList in Synchronized way
 	 * @param generic Element to add
 	 */
-	public static synchronized void add(IndexElement ge, Document doc){
+	public static synchronized void add(Document doc){
 		try {
-			tWriter.add(ge);
+			count++;
+			//tWriter.add(ge);
 			sbTuple.setLength(0);
 			for(TimeTuple tup:doc.T){
-				sbTuple.append(tup.toStore() + "#");
+				sbTuple.append("#" + tup.toStore());
 			}
-			t_Doc_Writer.add(new GenericElement(doc.identifier, sbTuple.toString()));
+			//t_Doc_Writer.add(new GenericElement(doc.identifier, 
+				//	doc.publication.toString() + "#" + doc.timeFrame.toStore() + sbTuple.toString()));
+
+			makeYours(doc.identifier, 
+					doc.publication.toString() + "#" + doc.timeFrame.toStore() 
+					+ sbTuple.toString());
+			doc.T = null;
+			doc.timeFrame = null;
+			doc.publication = null;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private static synchronized void makeYours(String identifier, String value) {
+		// TODO Auto-generated method stub
+		try {
+			byte[] v = decode(value);
+			valueFile.writeInt(v.length);
+			valueFile.write(v);
+			keyValuePair.put(identifier, offset);
+			offset += v.length + 4;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static synchronized TimeWrap getTimeWrap(String key){
+		try{
+			int offset = keyValuePair.get(key);
+			valueFile.seek(offset);
+			int length = valueFile.readInt();
+			byte[] b = new byte[length];
+			valueFile.readFully(b);
+			String ss[] = new String(b).split("#");
+
+			Time pub = new Time(ss[0].split("-"));
+			TimeTuple timeFrame = new TimeTuple(ss[1].split(":"));
+
+			ArrayList<TimeTuple> t = new ArrayList<TimeTuple>();
+			ss = Utility.subarray(ss, 2);
+			for(String s:ss){
+				t.add(new TimeTuple(s.split(":")));
+			}
+			return new TimeWrap(pub, timeFrame, t);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private static byte[] decode(String value) {
+		// TODO Auto-generated method stub
+
+		return value.getBytes();
+	}
+
+	public static void dump(){
+		try{
+			PrintWriter pw = new PrintWriter(new File(path + "/keyValue.txt"));
+			for(Entry<String, Integer> en:keyValuePair.entrySet()){
+				valueFile.seek(en.getValue());
+				int length = valueFile.readInt();
+				byte[] b = new byte[length];
+				valueFile.readFully(b);
+				pw.write(en.getKey() + " --> " +new String(b));
+				pw.write("\n");
+			}
+			pw.flush();
+			pw.close();
+		}
+		catch(Exception e){
 			e.printStackTrace();
 		}
 	}
@@ -184,7 +278,7 @@ public class Time implements Comparable<Time>, Serializable{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * to retrieve time from the index
 	 * @param key
@@ -200,7 +294,7 @@ public class Time implements Comparable<Time>, Serializable{
 		if(year == 0){
 			return 0;
 		}
-		
+
 		if(year == t.year){
 			if(month == t.month){
 				return date - t.date;
@@ -252,6 +346,15 @@ public class Time implements Comparable<Time>, Serializable{
 	 */
 	public static void close(){
 		try {
+			ObjectOutputStream oos = new ObjectOutputStream(
+					new FileOutputStream(new File(path + "/keyIndex")));
+			oos.writeObject(keyValuePair);
+			oos.flush();
+			oos.close();
+
+			if(valueFile != null){
+				valueFile.close();
+			}
 			if(ps != null) 
 				ps.close();
 
@@ -260,7 +363,7 @@ public class Time implements Comparable<Time>, Serializable{
 
 			if(tReader != null) 
 				tReader.close();
-			
+
 			if(t_Doc_Writer != null){
 				t_Doc_Writer.close();
 			}

@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.anarres.jperf.PerfectMapGenerator;
-import org.anarres.jperf.PerfectObjectMapGenerator;
 import org.galagosearch.core.index.IndexReader;
 import org.galagosearch.core.index.IndexReader.Iterator;
 import org.galagosearch.core.index.StructuredIndex;
@@ -52,6 +50,7 @@ import org.galagosearch.tupleflow.execution.Stage;
 import org.galagosearch.tupleflow.execution.StageConnectionPoint;
 import org.galagosearch.tupleflow.execution.Step;
 import org.mortbay.jetty.Server;
+import org.omg.CORBA._PolicyStub;
 
 /**
  *
@@ -158,7 +157,7 @@ public class App {
 		if (store.hasStatements()) {
 			output.println(store.toString());
 		}
-
+		System.out.println(Time.count);
 		Time.close();
 	}
 
@@ -293,7 +292,7 @@ public class App {
 		}
 
 		Time.init(args[1], false, new FileOutputStream(new File(args[1] + "dump")));
-
+		//Time.dump();
 		String indexPath = args[1];
 		String[][] filtered = Utility.filterFlags(Utility.subarray(args, 2));
 		String[] flags = filtered[0];
@@ -310,7 +309,7 @@ public class App {
 		 * Here ON Modifications
 		 * @author ocean
 		 */
-
+		/*
 		if(Time.f_Time.exists()){
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(Time.f_Time));
 			Time._perfectMap = (TreeMap<String, TimeWrap>) ois.readObject();
@@ -328,34 +327,39 @@ public class App {
 	        	writer.println(iter.getKey() + iter.getValue().toString());
 	        }
 	        writer.flush(); writer.close();
-	        //*/
+	        //*
 		}
-		else{
+		else //*{
 			//*
 
-			PerfectMapGenerator<String, TimeWrap> perf = new PerfectObjectMapGenerator<String, TimeWrap>();
+			//PerfectMapGenerator<String, TimeWrap> perf = new PerfectObjectMapGenerator<String, TimeWrap>();
 			Iterator it = Time.tReader.getIterator();
 			//HashMap<String, String> mp = new HashMap<String, String>();
 			//PerfectObjectMapGenerator<String, String> pMap = new PerfectObjectMapGenerator<String, String>();
+			/*
 			for(;it.nextKey();){
 				Time.ps.println(it.getKey() + " : " + it.getValueString());
-				System.out.println(it.getKey() + " : " + it.getValueString());	
 				//Time._Map.put(it.getKey(), new TimeWrap(it.getValueString().split("#")));
-				perf.add(it.getKey(), new TimeWrap(it.getValueString().split("#")));
+				//perf.add(it.getKey(), new TimeWrap(it.getValueString().split("#")));
 			}
 			Time.ps.close();
-			Time._perfectMap = new TreeMap<String, TimeWrap>(perf.toMap());
+			//Time._perfectMap = new TreeMap<String, TimeWrap>(perf.toMap());
+			
+			//*
 			
 			PrintStream psTuple = new PrintStream(Time.path + "/dumpTuples");
 			it = Time.t_Doc_Reader.getIterator();
+			Time._perfectTuples = new TreeMap<String, TimeWrap>();
+			
 			for(;it.nextKey();){
 				psTuple.println(it.getKey() + " --> " + it.getValueString());
 				System.out.println(it.getKey() + " --> " + it.getValueString());
+				Time._perfectTuples.put(it.getKey(), decode(it.getValueString()));
 			}
 			
 			psTuple.close();
 			
-			//*
+			/*
 			Time.ps = new PrintStream(Time.path + "/jperfDump");
 			for(Map.Entry<String, TimeWrap> s : Time._perfectMap.entrySet()){
 				Time.ps.println(s.getKey() +" # " + s.getValue().toString());
@@ -363,7 +367,7 @@ public class App {
 			Time.ps.close();
 			//*/
 			
-			//*
+			/*
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(Time.f_Time));
 			oos.writeObject(Time._perfectMap);
 			oos.flush();
@@ -390,13 +394,29 @@ public class App {
         	}
         	writer.flush(); writer.close();
 
-        //*/
+       
 		}
+	 	//*/
 		Parameters p = new Parameters(flags);
 		Retrieval retrieval = Retrieval.instance(indexPath, p);
 		handleSearch(retrieval, getDocumentStore(corpusFiles));
 
 		//Time.close();
+	}
+
+	private TimeWrap decode(String valueString) {
+		// TODO Auto-generated method stub
+		String ss[] = valueString.split("#");
+		
+		Time pub = new Time(ss[0].split("-"));
+		TimeTuple timeFrame = new TimeTuple(ss[1].split(":"));
+		
+		ArrayList<TimeTuple> t = new ArrayList<TimeTuple>();
+		ss = Utility.subarray(ss, 2);
+		for(String s:ss){
+			t.add(new TimeTuple(s.split(":")));
+		}
+		return new TimeWrap(pub, timeFrame, t);
 	}
 
 	public void handleEval(String[] args) throws IOException {

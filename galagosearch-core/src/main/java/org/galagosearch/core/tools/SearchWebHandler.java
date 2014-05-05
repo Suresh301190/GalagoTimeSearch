@@ -131,8 +131,10 @@ public class SearchWebHandler extends AbstractHandler {
     }
 
     public void retrieveImage(OutputStream output,HttpServletRequest request) throws IOException {
+    	//System.out.println(request.toString());
         InputStream image = getClass().getResourceAsStream(request.getPathInfo());
         Utility.copyStream(image, output);
+       
         output.close();
     }
 
@@ -141,6 +143,20 @@ public class SearchWebHandler extends AbstractHandler {
         response.setContentType("image/png");
         retrieveImage(output,request);
     }
+    public void handleTxt(HttpServletRequest request,HttpServletResponse response) throws IOException {
+		// TODO Auto-generated method stub
+    	OutputStream output = response.getOutputStream();
+        response.setContentType("text/plain");
+        retrieveTxt(output,request);
+		
+	}
+    public void retrieveTxt(OutputStream output, HttpServletRequest request) throws IOException {
+		// TODO Auto-generated method stub
+    	InputStream text = getClass().getResourceAsStream(request.getPathInfo());
+        Utility.copyStream(text, output);
+        output.close();
+		
+	}
     
     public void handleJs(HttpServletRequest request,HttpServletResponse response) throws IOException {
 		// TODO Auto-generated method stub
@@ -172,6 +188,7 @@ public class SearchWebHandler extends AbstractHandler {
         output.close();
 		
 	}
+    
 	public void handleSearch(HttpServletRequest request, HttpServletResponse response) throws Exception {
         SearchResult result = performSearch(request);
         response.setContentType("text/html");
@@ -262,8 +279,8 @@ public class SearchWebHandler extends AbstractHandler {
 "</script> \n");
         writer.append("<div id=\"header\">\n");
         writer.append("<table ><tr >");
-        writer.append("<td width=\"15%\"><a href=\"http://www.galagosearch.org\">" +"<img src=\"/images/MainLogo4.png\" width=\"100%\"></a></td>");
-        writer.append("<td width=\"85%\"><br/><form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"70\" style=\"height: 30px\"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 27px; width:80px\" ></form></td>");
+        writer.append("<td width=\"15%\"><a href=\"https://github.com/Suresh301190/GalagoTimeSearch\">" +"<img src=\"/images/MainLogo4.png\" width=\"100%\"></a></td>");
+        writer.append("<td width=\"85%\"><br/><form action=\"search\">"+String.format("<input type=\"text\" name=\"q\" class=\"search rounded\" size=\"70\" value=\"%s\" style=\"height: 30px\">",displayQuery)+"<input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 27px; width:80px\" ></form></td>");
         writer.append("</tr>");
         writer.append("</table>\n");
         writer.append("</div>\n");
@@ -284,7 +301,7 @@ public class SearchWebHandler extends AbstractHandler {
         	writer.append("<td width=\"15%\"></td>\n");
         	writer.append("<td width=\"55%\" >\n");
         	//String s=item.summary;
-            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n","Publication Date : "+item.timeFrame.toString()));
+            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n","Publication Date : "));//+item.timeFrame.toString()));
             writer.append(String.format("<a href=\"document?identifier=%s\">%s +\"   \"+%s</a><br/>" +
                                         "<div id=\"meta\">%s - %s</div>\n",
                                         item.identifier,
@@ -293,7 +310,7 @@ public class SearchWebHandler extends AbstractHandler {
                                         item.summary,
                                         item.displayTitle,
                                         scrub(item.identifier),
-                                        item.timeFrame.toString(),
+                                       // item.timeFrame.toString(),
                                         scrub(item.url)));
             writer.append("</div>\n");
            // writer.append(" <div class=\"tooltip_description\" style=\"display:none\" title=\"Item 1 Description\">th desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>");
@@ -385,7 +402,7 @@ public class SearchWebHandler extends AbstractHandler {
     	writer.write("<style type=\"text/css\">\n");
     	writer.write(".highlight { background-color: #C0C0C0 }");
     	writer.write("body  { font-family: Helvetica, sans-serif;}\n");
-    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px; background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);  -webkit-border-radius:15px;}");
+    	writer.write(".rounded {border-radius:15px;	outline:none; -moz-border-radius:15px; background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);  -webkit-border-radius:15px;}");
     	writer.write(".lighter {width:95%;	height:50px;padding:40px 25px; }");
     	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #39C63A 0%,#708F70 100%); color:#72aa;cursor: pointer;}");
         writer.write("img { border-style: none; }\n");
@@ -401,6 +418,7 @@ public class SearchWebHandler extends AbstractHandler {
         writer.write("#dhtmlpointer{position:absolute;left: -300px;z-index: 101;visibility: hidden;}");
         writer.write("#debug { display: none; }\n");
         writer.write("</style>");
+       // writer.append("<link rel=\"shortcut icon\" href=\"/images/favicon.ico\" />");
     }
 
     public void handleMainPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -412,20 +430,26 @@ public class SearchWebHandler extends AbstractHandler {
         writer.append("<head>\n");
         //writeStyle(writer);
         writer.write("<style type=\"text/css\">\n");
-    	writer.write(".rounded {border-radius:15px;	-moz-border-radius:15px; background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);-webkit-border-radius:15px;}");
+    	writer.write(".rounded {border-radius:15px;	outline:none; -moz-border-radius:15px; background: -webkit-linear-gradient(top, #dcdcdc 0%,#808080 100%);-webkit-border-radius:15px;}");
     	writer.write(".lighter {width:95%;	margin:25px; height:50px;padding:80px 55px;}");
-    	writer.write("input[type=submit], input[type=submit]:hover{position:relative; left:-85px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #39C63A 0%,#708F70 100%); color:#72aa;cursor: pointer;}");
-    	writer.write("html {background: url(/images/NYT1.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}");
+    	writer.write(".serif{font-family:\"Times New Roman\",Times,serif;}");
+    	writer.write(".italic {font-style:italic;}");
+    	writer.write("input[type=submit],:hover{position:relative; left:-82px;border:1px solid #adc5cf; background: -webkit-linear-gradient(top, #39C63A 0%,#708F70 100%); color:#72aa;cursor: pointer;}");
+    	writer.write("html {background: url(/images/final.jpg) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}");
     	writer.write("body  { font-family: Helvetica, sans-serif; background-size:cover;background-repeat: no-repeat; fixed; }\n");
         writer.write("img { border-style: none; }\n");
         writer.write("#box { solid #ccc; margin: 0; display:inline-block; position:relative; }\n");
         writer.write("#header { background: rgb(210, 233, 217); border: 1px solid #ccc; }\n");
         writer.write("</style>");
-        writer.append("<title><FONT COLOR=\"00FF00\">Chronons</FONT></title></head>");
+        writer.append("<title>Chronons</title></head>");
+        writer.append("<link rel=\"shortcut icon\" href=\"/images/favicon.ico\" />");
         writer.append("<body></a><br/>\n");
-        
+        //writer.append("<link rel=\"stylesheet\" href=\"http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css\">");
+        //writer.append("<script src=\"http://code.jquery.com/jquery-1.10.2.js\"></script>");
+        //writer.append("<script src=\"http://code.jquery.com/ui/1.10.4/jquery-ui.js\"></script>");
+        //writer.append("<script type=\"text/javascript\">$(function() {var availableTags = [\"ActionScript\",\"AppleScript\",\"Asp\",\"BASIC\"]; $( \"#tags\" ).autocomplete({ source: availableTags});});</script>");
         writer.append("<center><br/><br/><div id=\"lighter\" style = \"margin-left: 0px;\" >\n");
-        writer.append("<form action=\"search\"><input type=\"text\" name=\"q\" class=\"search rounded\" size=\"80\" style=\"height: 40px\" placeholder=\"Enter your query and start the time machine..\"><input value=\"Search\" class=\"search rounded\" type=\"submit\" style=\"height: 37px; width:80px\" ></span></form><br/><br/>");
+        writer.append("<form action=\"search\"><input type=\"text\" name=\"q\" id=\"tags\" class=\"rounded\" size=\"80\" style=\"height: 40px\"><input value=\"Search\"  class=\"rounded\" type=\"submit\" style=\"height: 37px; width:80px\" ></span></form><br/><br/>");
         writer.append("</div></center></body></html>\n");
         
         writer.close();
@@ -454,6 +478,8 @@ public class SearchWebHandler extends AbstractHandler {
         	handleJs(request,response);
         } else if(request.getPathInfo().equals("/css1")){
         	handleCs(request,response);
+        } else if(request.getPathInfo().equals("/textFiles")){
+        	handleTxt(request,response);
         }else {
             handleMainPage(request, response);
         }

@@ -15,6 +15,7 @@ import org.galagosearch.core.parse.Document;
 import org.galagosearch.core.parse.TagTokenizer;
 import org.galagosearch.core.parse.Time;
 import org.galagosearch.core.parse.TimeTuple;
+import org.galagosearch.core.parse.TimeWrap;
 import org.galagosearch.core.retrieval.Retrieval;
 import org.galagosearch.core.retrieval.ScoredDocument;
 import org.galagosearch.core.retrieval.query.Node;
@@ -96,27 +97,33 @@ public class Search {
 		Document doc = new TagTokenizer().tokenize(query);
 		TimeTuple.setTimeFrame(doc, true);
 		TimeTuple.qTF = doc.timeFrame;
+		TimeTuple.Q_abs();
+		
+		//*
 		StringBuffer sb = new StringBuffer("");
 		for(String s:doc.terms){
 			sb.append(s);
 			sb.append(' ');
 		}
+		/*
 		String s[] = new String[doc.terms.size()];
 		ArrayList<String> improvedQuery = queryExpand(doc.terms.toArray(s));
 		System.out.println(improvedQuery.toString());
+		//*/
 		/*
 		 * @author
 		 * Suresh Rangaswamy
 		 */
 
 
-		Time.qFos = new PrintStream(new File("/home/ocean/Desktop/" + sb.toString() + Time.counter++ + ".txt"));
+		Time.qFos = new PrintStream(new File("/home/ocean/Desktop/" + query + Time.counter++ + ".txt"));
+		Time.qlog = new PrintStream(new File("/home/ocean/Desktop/" + query + Time.counter++ + ".txt"));
 		//Node tree = parseQuery(query, new Parameters());
 		Node tree = parseQuery(sb.toString(), new Parameters());
 		Node transformed = retrieval.transformQuery(tree);
 		ScoredDocument[] results = retrieval.runQuery(transformed, startAt + count);
 
-		addTime(results);
+		//addTime(results);
 		//Arrays.sort(results);
 
 		SearchResult result = new SearchResult();
@@ -133,13 +140,16 @@ public class Search {
 			item.rank = i + 1;
 			item.identifier = identifier;
 			item.displayTitle = identifier;
-			if(Time._perfectMap.floorEntry(identifier) != null){
-				item.publication = Time._perfectMap.floorEntry(identifier).getValue().publication;
-				item.timeFrame = Time._perfectMap.floorEntry(identifier).getValue().timeFrame;
+			TimeWrap w;
+			/*
+			if((w = Time._perfectTuples.get(identifier)) != null){
+				item.publication = w.publication;
+				item.timeFrame = w.timeFrame;
 			}
 			else{
 				item.publication = TimeTuple.qTF.tb_u;
 			}
+			//*/
 
 			if (document.metadata.containsKey("title")) {
 				item.displayTitle = document.metadata.get("title");
@@ -165,6 +175,7 @@ public class Search {
 		System.out.println("qTF : " + TimeTuple.qTF.toString() 
 				+ "\n" + doc.terms.toString());
 		Time.qFos.close();
+		Time.qlog.close();
 		return result;
 	}
 
@@ -187,7 +198,10 @@ public class Search {
 		RiWordNet wordnet;
 		ArrayList<String> expandedQuery = new ArrayList<String>();
 		Set<String> similarWords = new HashSet<String> ();
-		wordnet = new RiWordNet("src/main/resources/WordNet-3.0", false, false);
+		if(System.getProperty("os.name").equals("unix")){
+			wordnet = new RiWordNet("src/main/resources/WordNet-3.0", false, false);
+		}
+		else wordnet = new RiWordNet("C:\\Program Files (x86)\\WordNet\\2.1", false, false);
 		englishStemmer stemmer = new englishStemmer();
 
 		for(String word:words){
@@ -199,6 +213,7 @@ public class Search {
 		}
 		for(String word:expandedQuery) {
 			// Add original query terms after stemming
+
 			try{
 				String[] tmp = {};   
 				String pos = wordnet.getBestPos(word);
