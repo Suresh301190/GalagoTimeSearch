@@ -2,7 +2,11 @@ package org.galagosearch.core.parse;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+
+import javax.print.Doc;
 
 
 public class TimeTuple implements Serializable{
@@ -10,16 +14,23 @@ public class TimeTuple implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 318681837648995451L;
-	
+
 	public static TimeTuple qTF;
 	private static double q_abs = 1;
-	
+	private static final double _defABS;
+
 	public static void Q_abs(){
 		q_abs = abs(qTF);
 	}
 
-	Time tb_l, tb_u, te_l, te_u;
-	
+	public Time tb_l, tb_u, te_l, te_u;
+	static final TimeTuple _defTimeFrame;
+	static{
+		_defTimeFrame = new TimeTuple("1-1-1900:31-12-1900:1-1-2015:31-12-2015".split(":"));
+		System.out.println(_defABS = abs(_defTimeFrame));
+	}
+	boolean hasFrame = false;
+
 	static StringBuffer sb = new StringBuffer("0000000");
 	public TimeTuple() {
 		tb_l = new Time();
@@ -35,6 +46,26 @@ public class TimeTuple implements Serializable{
 		te_l = new Time(t[2].split("-"));
 		te_u = new Time(t[3].split("-"));
 	}
+	
+	private TimeTuple(Time t, Time pub){
+		if(t.year == 0){
+			t.year = pub.year;
+		}
+		te_u = te_l = tb_u = tb_l = t;
+		
+		if(tb_l.month == 0){
+			tb_l.month = 1;
+			tb_u.month = 12;
+			te_l.month = 1;
+			te_u.month = 12;
+		}
+		if(tb_l.date == 0){
+			tb_l.date = 1;
+			tb_u.date = 30;
+			te_l.date = 1;
+			te_u.date = 30;
+		}
+	}
 
 	/**
 	 * To find the P(Q|T) efficiently
@@ -48,32 +79,83 @@ public class TimeTuple implements Serializable{
 		//System.out.println(Time._keys.contains(key));
 		//System.out.println(Time._Map.get(key));
 		TimeWrap D;
-		//*
-		if((D = Time._Map.get(key)) == null){
-			D = new TimeWrap();return 1.0;
+		/*
+		if((D = Time._perfectMap.get(key)) == null){
+			D = new TimeWrap(_defTimeFrame);
+			return 100;
+			//System.out.println(key);
 		}
 		else{
-			return 1.0;
+			if(check(D.timeFrame.tb_l)){
+				D.timeFrame = _defTimeFrame;
+			}
+			//System.out.println(D.timeFrame.toString());
 		}
 		//*/
-		//System.out.println(D.timeFrame.toString());
-		//double dr = (Time.abs_T[Integer.parseInt(key) - Time.min] + 0.5)*q_abs;
-		
-		//double pQ_T = intersection(D.timeFrame, qTF)/dr;
-			
+		Entry<String, TimeWrap> en = Time._perfectMap.floorEntry(key);
+		if(en != null){
+			D = en.getValue();
+			if(check(D.timeFrame.tb_l)){
+				D.timeFrame.update(new Time(("0-0-" + D.publication.year).split("-")));
+				D.absT = abs(D.timeFrame);
+			}
+			double dr = 1.0 * D.absT*q_abs;
+			double pQ_T;
+			if((pQ_T = (intersection(D.timeFrame, qTF))) == -1){
+				return 1000;
+			}
+			//System.out.println(D.timeFrame.toString() + "\n" + intersection(D.timeFrame, qTF) + " " + dr + " : " + pQ_T);
+			return pQ_T/dr;
+		}
+
+		return 100;
 		//*/
-		//return 1/pQ_T;
+	}
+
+	public static boolean check(Time t) {
+		// TODO Auto-generated method stub
+		return t.year == 0 && t.month == 0 && t.date == 0;
 	}
 
 	private static double intersection(TimeTuple tf, TimeTuple q) {
 		// TODO Auto-generated method stub
-		TimeTuple in = new TimeTuple();
-		in.tb_l = tf.tb_l.compareTo(q.tb_l)>0?tf.tb_l:q.tb_l;
-		in.tb_l = tf.tb_u.compareTo(q.tb_u)<0?tf.tb_u:q.tb_u;
-		in.tb_l = tf.te_l.compareTo(q.te_l)>0?tf.te_l:q.te_l;
-		in.tb_l = tf.te_u.compareTo(q.te_u)<0?tf.te_u:q.te_u;
-		
-		return abs(in);
+
+		if(tf.te_u.compareTo(q.tb_l) < 0 || q.te_u.compareTo(tf.tb_l) < 0){
+			return -1;
+		}
+		else{
+			TimeTuple in = new TimeTuple();
+			in.tb_l = tf.tb_l.compareTo(q.tb_l)>0?tf.tb_l:q.tb_l;
+			in.tb_u = tf.tb_u.compareTo(q.tb_u)<0?tf.tb_u:q.tb_u;
+
+			if(in.tb_l.compareTo(in.tb_u) > 0){
+				in.tb_u = tf.tb_u.compareTo(q.tb_u)>0?tf.tb_u:q.tb_u;
+			}
+			in.te_l = tf.te_l.compareTo(q.te_l)>0?tf.te_l:q.te_l;
+			in.te_u = tf.te_u.compareTo(q.te_u)<0?tf.te_u:q.te_u;
+
+			if(in.te_l.compareTo(in.te_u) > 0){
+				in.te_l = tf.te_l.compareTo(q.te_l)<0?tf.te_l:q.te_l;
+			}
+
+			System.out.println(tf.toString());
+			System.out.println(q.toString());
+			System.out.println(in.toString());
+
+			System.out.println("\n");
+			
+			
+
+			return (abs(in));
+		}
+	}
+
+	private static boolean overlapExists(TimeTuple tf, TimeTuple q) {
+		// TODO Auto-generated method stub
+		if(tf.te_u.compareTo(q.tb_l) <= 0 || q.te_u.compareTo(tf.tb_l) < 0){
+
+		}
+		return false;
 	}
 
 	/**
@@ -84,16 +166,16 @@ public class TimeTuple implements Serializable{
 	public static double abs(TimeTuple timeFrame) {
 		// TODO Auto-generated method stub
 		if(timeFrame.tb_u.compareTo(timeFrame.te_l) <= 0){
-			return (Time.abs(timeFrame.tb_u, timeFrame.tb_l) + 1)
-					* (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1);
+			return Math.abs((Time.abs(timeFrame.tb_u, timeFrame.tb_l) + 1)
+					* (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1));
 		}
-		
-		double ans = (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1);
-		
-		ans *= (Time.abs(timeFrame.te_l, timeFrame.tb_l) + 1)
-				+ Time.abs(timeFrame.tb_u, timeFrame.te_l)
-				- 0.5*(Time.abs(timeFrame.tb_u, timeFrame.tb_l));
-		return ans;
+
+		double ans = (Time.abs(timeFrame.te_u, timeFrame.te_l) + 1)
+				*((Time.abs(timeFrame.te_l, timeFrame.tb_l) + 1) + Time.abs(timeFrame.tb_u, timeFrame.te_l));
+
+		ans -= 0.5*(Time.abs(timeFrame.tb_u, timeFrame.te_l)) 
+				* (Time.abs(timeFrame.tb_u, timeFrame.te_l) + 1);
+		return Math.abs(ans);
 	}
 
 	/**
@@ -101,44 +183,68 @@ public class TimeTuple implements Serializable{
 	 * sets TimeFrame for the document
 	 * @param document from which it needs to be retrieved
 	 */
-	public static void setTimeFrame(Document document) {
+	public static void setTimeFrame(Document document, boolean isQuery) {
 		// TODO Auto-generated method stub
 		document.timeFrame = new TimeTuple();
+		document.T = new ArrayList<TimeTuple>();
 		Time t = new Time();
 		
+		int counter = 0;
+
 		for (int i = 0; i < document.terms.size(); ++i) {
-            String term = document.terms.get(i);
-            
-            if (isYear(term)) {
-                t.year = Integer.parseInt(term);
-                t.month = getMonth(document.terms, i);
-                t.date = getDate(document.terms, i);
-                
-                document.timeFrame.update(t);
-            }
-            else if(isMonth(term)){
-            	t.month = Time.monthMap.get(term);
-            	t.date = getDate(document.terms, i);
-            	
-            	if(t.year != 0) document.timeFrame.update(t);
-            }
-        }
+			String term = document.terms.get(i);
+
+			if (isYear(term)) {
+				t.year = Integer.parseInt(term);
+				t.month = getMonth(document.terms, i);
+				t.date = getDate(document.terms, i);
+				document.timeFrame.hasFrame = true;
+				document.timeFrame.update(t);
+				addTuple(document, t);
+				counter = i;
+				if(isQuery){
+					document.terms.remove(i);
+					--i;
+				}
+			}
+			else if(isMonth(term)){
+				t.month = Time.monthMap.get(term);
+				t.date = getDate(document.terms, i);
+				document.timeFrame.hasFrame = true;
+				if(t.year != 0) document.timeFrame.update(t);
+				
+				if(Math.abs(counter - i) > 1){
+					addTuple(document, t);
+				}
+				
+				if(isQuery){
+					document.terms.remove(i);
+					--i;
+				}
+			}
+		}
+		
+		System.out.println(document.T.toString());
 	}
 	
+	private static synchronized void addTuple(Document document, Time t){
+		document.T.add(new TimeTuple(t, document.publication));
+	}
+
 	private void update(Time t) {
 		// TODO Auto-generated method stub
-		
+
 		if(tb_l.compareTo(t) >= 0){
 			copy(tb_l, t, 1, 1);
 			copy(tb_u, t, 30, 12);
 		}		
-		
+
 		if(te_u.compareTo(t) <= 0) {
 			copy(te_l, t, 1, 1);
 			copy(te_u, t, 30, 12);
 		}
 	}
-	
+
 	/**
 	 * Copies time t1 from t2 
 	 * @param t1 time to copy
@@ -148,13 +254,13 @@ public class TimeTuple implements Serializable{
 	 */
 	public static void copy(Time t1, Time t2, int defDate, int defMonth) {
 		// TODO Auto-generated constructor stub
-		
+
 		if(t2.date != 0) t1.date = t2.date;
 		else t1.date = defDate;
-		
+
 		if(t2.month != 0) t1.month = t2.month;
 		else t1.month = defMonth;
-		
+
 		if(t2.year != 0){
 			t1.year = t2.year;
 		}
@@ -162,21 +268,21 @@ public class TimeTuple implements Serializable{
 
 	private static int getDate(List<String> terms, int i) {
 		// TODO Auto-generated method stub
-		
+
 		if (i > 0 && isDate(terms.get(i-1))) {
 			return Integer.parseInt(terms.get(i-1));
 		}
-		
+
 		if (i < terms.size()-1 && isDate(terms.get(i+1))) {
 			return Integer.parseInt(terms.get(i+1));
 		}
-		
+
 		return 0;
 	}
-	
+
 	private static boolean isDate(String term) {
 		// TODO Auto-generated method stub
-		
+
 		if(term.length() > 2 || !term.matches("[0-9]+")) return false;
 		else return true;
 	}
@@ -187,7 +293,7 @@ public class TimeTuple implements Serializable{
 				" te_l : " + te_l.toString() + 
 				" te_u : " + te_u.toString();
 	}
-	
+
 	public String toStore(){
 		return  tb_l.toString() +
 				":"+ tb_u.toString() +
@@ -242,14 +348,14 @@ public class TimeTuple implements Serializable{
 				Character.isDigit(year.charAt(2)) &&
 				Character.isDigit(year.charAt(3));
 	}
-	
+
 	/**
 	 * Might not use it
 	 * @param year to be checked
 	 * @return true if it might be an year token
 	 */
 	public static boolean isYear2(String year){
-		
+
 		if (year.length() != 2)
 			return false;
 
@@ -259,4 +365,6 @@ public class TimeTuple implements Serializable{
 
 		return Character.isDigit(year.charAt(1));
 	}
+	
+	StringBuffer sbTuple = new StringBuffer();
 }

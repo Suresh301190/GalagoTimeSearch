@@ -14,7 +14,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
+import org.anarres.jperf.PerfectMapGenerator;
+import org.anarres.jperf.PerfectObjectMapGenerator;
 import org.galagosearch.core.index.IndexReader;
 import org.galagosearch.core.index.IndexReader.Iterator;
 import org.galagosearch.core.index.StructuredIndex;
@@ -308,17 +311,18 @@ public class App {
 		 * @author ocean
 		 */
 
-		if(Time.f_Time.exists() && Time.f_Abs.exists()){
+		if(Time.f_Time.exists()){
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(Time.f_Time));
-			Time._Map = (HashMap<String, TimeWrap>) ois.readObject();
+			Time._perfectMap = (TreeMap<String, TimeWrap>) ois.readObject();
 			ois.close();
 			
+			/*
 			ois = new ObjectInputStream(new FileInputStream(Time.f_Abs));
 			Time.min = ois.readInt();
 			Time.abs_T =  (double[]) ois.readObject();
 			ois.close();
 			
-			//*
+			/*
 			PrintStream writer = new PrintStream(new File(Time.path + "/DumpMap"));
 	        for(Map.Entry<String, TimeWrap> iter : Time._Map.entrySet()){
 	        	writer.println(iter.getKey() + iter.getValue().toString());
@@ -329,29 +333,42 @@ public class App {
 		else{
 			//*
 
+			PerfectMapGenerator<String, TimeWrap> perf = new PerfectObjectMapGenerator<String, TimeWrap>();
 			Iterator it = Time.tReader.getIterator();
-			int max = 0, min = Integer.MAX_VALUE;
 			//HashMap<String, String> mp = new HashMap<String, String>();
 			//PerfectObjectMapGenerator<String, String> pMap = new PerfectObjectMapGenerator<String, String>();
 			for(;it.nextKey();){
-				max = Math.max(max, Integer.parseInt(it.getKey()));
-				min = Math.min(min, Integer.parseInt(it.getKey()));
-				Time.ps.println(it.getKey() + " : " + it.getValueString());		
-				Time._Map.put(it.getKey(), new TimeWrap(it.getValueString().split("#")));
-				//mp.put(it.getKey(), it.getValueString());m
+				Time.ps.println(it.getKey() + " : " + it.getValueString());
+				System.out.println(it.getKey() + " : " + it.getValueString());	
+				//Time._Map.put(it.getKey(), new TimeWrap(it.getValueString().split("#")));
+				perf.add(it.getKey(), new TimeWrap(it.getValueString().split("#")));
+			}
+			Time.ps.close();
+			Time._perfectMap = new TreeMap<String, TimeWrap>(perf.toMap());
+			
+			PrintStream psTuple = new PrintStream(Time.path + "/dumpTuples");
+			it = Time.t_Doc_Reader.getIterator();
+			for(;it.nextKey();){
+				psTuple.println(it.getKey() + " --> " + it.getValueString());
+				System.out.println(it.getKey() + " --> " + it.getValueString());
 			}
 			
-			Time.abs_T = new double[(int) ((max-min)*1.1)];
-			for(Map.Entry<String, TimeWrap> iter:Time._Map.entrySet()){
-				Time.abs_T[Integer.parseInt(iter.getKey()) - min] = TimeTuple.abs(iter.getValue().timeFrame);
+			psTuple.close();
+			
+			//*
+			Time.ps = new PrintStream(Time.path + "/jperfDump");
+			for(Map.Entry<String, TimeWrap> s : Time._perfectMap.entrySet()){
+				Time.ps.println(s.getKey() +" # " + s.getValue().toString());
 			}
+			Time.ps.close();
+			//*/
 			
 			//*
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(Time.f_Time));
-			oos.writeObject(Time._Map);
+			oos.writeObject(Time._perfectMap);
 			oos.flush();
 			oos.close();
-			
+			/*
 			oos = new ObjectOutputStream(new FileOutputStream((Time.f_Abs)));
 			oos.writeInt(min);
 			oos.writeObject(Time.abs_T);

@@ -2,7 +2,9 @@
 
 package org.galagosearch.core.retrieval.structured;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,8 +108,18 @@ public class StructuredRetrieval extends Retrieval {
             int document = iterator.nextCandidate();
             int length = index.getLength(document);
             //System.out.println(document + ":" + Integer.parseInt(Search.getIdentifier.getDocumentName(document)) + ":" + Time.abs_T[Integer.parseInt(Search.getIdentifier.getDocumentName(document))]);
-            double score = iterator.score(document, length)
-            		* TimeTuple.overlap(Search.getIdentifier.getDocumentName(document));
+            double score;
+            if(!TimeTuple.check(TimeTuple.qTF.tb_l)){
+            	score = iterator.score(document, length)
+            			* TimeTuple.overlap(getDocumentName(document));
+            }
+            else {
+            	score = iterator.score(document, length);
+            }
+            
+            Time.qFos.println(getDocumentName(document) + " : " + score);
+            		
+
 
             if (queue.size() <= requested || queue.peek().score < score) {
                 ScoredDocument scoredDocument = new ScoredDocument(document, score);

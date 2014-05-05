@@ -284,15 +284,16 @@ public class SearchWebHandler extends AbstractHandler {
         	writer.append("<td width=\"15%\"></td>\n");
         	writer.append("<td width=\"55%\" >\n");
         	//String s=item.summary;
-            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n","Publication Date : "+item.publication.toString()));
-            writer.append(String.format("<a href=\"document?identifier=%s\">%s</a><br/>" +
+            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n","Publication Date : "+item.timeFrame.toString()));
+            writer.append(String.format("<a href=\"document?identifier=%s\">%s +\"   \"+%s</a><br/>" +
                                         "<div id=\"meta\">%s - %s</div>\n",
+                                        item.identifier,
                                         item.identifier,
                                         item.displayTitle,
                                         item.summary,
                                         item.displayTitle,
                                         scrub(item.identifier),
-                                        item.publication.toString(),
+                                        item.timeFrame.toString(),
                                         scrub(item.url)));
             writer.append("</div>\n");
            // writer.append(" <div class=\"tooltip_description\" style=\"display:none\" title=\"Item 1 Description\">th desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>");

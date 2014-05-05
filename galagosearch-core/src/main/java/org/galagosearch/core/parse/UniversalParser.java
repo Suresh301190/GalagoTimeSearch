@@ -99,7 +99,7 @@ public class UniversalParser extends StandardStep<DocumentSplit, Document> {
 			// to add time info to Inverted List
 			if(Time.isBuild){
 				Time.add(new GenericElement(document.identifier, 
-						document.publication.toString() + "#" + document.timeFrame.toStore()));            
+						document.publication.toString() + "#" + document.timeFrame.toStore()), document);            
 			}
 
 			if (documentCounter != null)
