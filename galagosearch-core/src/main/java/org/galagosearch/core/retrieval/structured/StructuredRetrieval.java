@@ -2,9 +2,7 @@
 
 package org.galagosearch.core.retrieval.structured;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +11,12 @@ import java.util.PriorityQueue;
 import org.galagosearch.core.index.StructuredIndex;
 import org.galagosearch.core.parse.Time;
 import org.galagosearch.core.parse.TimeTuple;
-import org.galagosearch.core.retrieval.query.Node;
-import org.galagosearch.core.retrieval.query.StructuredQuery;
 import org.galagosearch.core.retrieval.Retrieval;
 import org.galagosearch.core.retrieval.ScoredDocument;
+import org.galagosearch.core.retrieval.query.Node;
 import org.galagosearch.core.retrieval.query.NodeType;
+import org.galagosearch.core.retrieval.query.StructuredQuery;
 import org.galagosearch.core.retrieval.query.Traversal;
-import org.galagosearch.core.tools.Search;
 import org.galagosearch.tupleflow.Parameters;
 
 /**

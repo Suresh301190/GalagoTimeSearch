@@ -1,6 +1,5 @@
 package org.galagosearch.core.parse;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,8 +17,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.galagosearch.core.index.GenericElement;
-import org.galagosearch.core.index.IndexElement;
 import org.galagosearch.core.index.IndexReader;
 import org.galagosearch.core.index.IndexWriter;
 import org.galagosearch.tupleflow.Utility;
@@ -62,6 +59,14 @@ public class Time implements Comparable<Time>, Serializable{
 
 	public static HashMap<String, Integer> keyValuePair;
 	public static RandomAccessFile valueFile;
+	
+	private static HashMap<Character, Byte> encoding = new HashMap<Character, Byte>();
+	private static HashMap<Byte, Character> decoding = new HashMap<Byte, Character>();
+	
+	private static byte[][] lookup = new byte[128][128];
+	private static String[] toDecode = new String[128];
+	private static char[] toEncode = new char[]{'0', '1', '2', '3', '4', 
+							'5', '6', '7', '8', '9', '-', ':', '#', '$'};
 
 	int date = 0, month = 0, year = 0;
 
@@ -89,7 +94,7 @@ public class Time implements Comparable<Time>, Serializable{
 		double ans;
 
 		ans = (double) 365*(t1.year - t2.year);
-		ans += 30*(t1.month - t1.month) + (t1.date - t2.date);
+		ans += 30*(t1.month - t2.month) + (t1.date - t2.date);
 
 		return Math.abs(ans);
 	}
@@ -112,8 +117,33 @@ public class Time implements Comparable<Time>, Serializable{
 			f_Abs = new File(path + Tabs);
 			File file = new File(path + "/values");
 			file.mkdir();
-			System.out.println(path);
-			valueFile = new RandomAccessFile(path + "/values", "rw");
+			valueFile = new RandomAccessFile(new File(path + "/values"), "rw");
+			
+			encoding.put('1', (byte) 1);
+			encoding.put('2', (byte) 2);
+			encoding.put('3', (byte) 3);
+			encoding.put('4', (byte) 4);
+			encoding.put('5', (byte) 5);
+			encoding.put('6', (byte) 6);
+			encoding.put('7', (byte) 7);
+			encoding.put('8', (byte) 8);
+			encoding.put('9', (byte) 9);
+			encoding.put('0', (byte) 10);
+			encoding.put('-', (byte) 11);
+			encoding.put('#', (byte) 12);
+			encoding.put(':', (byte) 13);
+			encoding.put('$', (byte) 14);
+			
+			byte b = 1;
+			for(int j = 0; j< toEncode.length; j++){
+				for(int k = j; k< toEncode.length; k++){
+					lookup[toEncode[j]][toEncode[k]] = b;
+					toDecode[b] = toEncode[j]+""+toEncode[k];
+					b++;
+				}
+			}
+			
+			
 
 			if(isBuild) {
 				keyValuePair = new HashMap<String, Integer>();
@@ -136,7 +166,6 @@ public class Time implements Comparable<Time>, Serializable{
 		if(isSearch){
 			_Map = new HashMap<String, TimeWrap>();
 			_keys = new HashSet<String>();
-
 		}
 
 		ps = new PrintStream(out);
@@ -204,7 +233,8 @@ public class Time implements Comparable<Time>, Serializable{
 	private static synchronized void makeYours(String identifier, String value) {
 		// TODO Auto-generated method stub
 		try {
-			byte[] v = decode(value);
+			byte[] v = value.getBytes();//encode(value);
+			//System.out.println(value.getBytes().length + " : " + v.length);
 			valueFile.writeInt(v.length);
 			valueFile.write(v);
 			keyValuePair.put(identifier, offset);
@@ -215,6 +245,19 @@ public class Time implements Comparable<Time>, Serializable{
 		}
 	}
 
+	private synchronized static byte[] encode(String value) {
+		// TODO Auto-generated method stub
+		byte[] b = new byte[(int) Math.ceil(1.0*value.length()/2)];
+		for(int i=0, j = 0;i<b.length;i++){
+			try{
+				b[i] = lookup[value.charAt(j++)][value.charAt(j++)];				
+			}catch(StringIndexOutOfBoundsException e){
+				b[i] = lookup[value.charAt(j-2)]['$'];
+			}
+		}
+		return b;
+	}
+
 	public static synchronized TimeWrap getTimeWrap(String key){
 		try{
 			int offset = keyValuePair.get(key);
@@ -222,7 +265,7 @@ public class Time implements Comparable<Time>, Serializable{
 			int length = valueFile.readInt();
 			byte[] b = new byte[length];
 			valueFile.readFully(b);
-			String ss[] = new String(b).split("#");
+			String ss[] = new String(b).split("#");//decode(b).split("#");
 
 			Time pub = new Time(ss[0].split("-"));
 			TimeTuple timeFrame = new TimeTuple(ss[1].split(":"));
@@ -239,10 +282,15 @@ public class Time implements Comparable<Time>, Serializable{
 		return null;
 	}
 
-	private static byte[] decode(String value) {
+	static private StringBuffer cbuf = new StringBuffer();
+	private static String decode(byte[] b) {
 		// TODO Auto-generated method stub
-
-		return value.getBytes();
+		cbuf.setLength(0);
+		for(int i = 0; i<b.length; i++){
+			cbuf.append(toDecode[b[i]]);
+		}
+		
+		return cbuf.toString();
 	}
 
 	public static void dump(){
@@ -253,7 +301,7 @@ public class Time implements Comparable<Time>, Serializable{
 				int length = valueFile.readInt();
 				byte[] b = new byte[length];
 				valueFile.readFully(b);
-				pw.write(en.getKey() + " --> " +new String(b));
+				pw.write(en.getKey() + " --> " + new String(b));
 				pw.write("\n");
 			}
 			pw.flush();

@@ -3,21 +3,13 @@
 package org.galagosearch.core.tools;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.galagosearch.core.index.IndexReader;
-import org.galagosearch.core.index.IndexReader.Iterator;
 import org.galagosearch.core.index.StructuredIndex;
 import org.galagosearch.core.index.StructuredIndexPartReader;
 import org.galagosearch.core.parse.Document;
@@ -50,7 +42,6 @@ import org.galagosearch.tupleflow.execution.Stage;
 import org.galagosearch.tupleflow.execution.StageConnectionPoint;
 import org.galagosearch.tupleflow.execution.Step;
 import org.mortbay.jetty.Server;
-import org.omg.CORBA._PolicyStub;
 
 /**
  *
@@ -292,7 +283,7 @@ public class App {
 		}
 
 		Time.init(args[1], false, new FileOutputStream(new File(args[1] + "dump")));
-		//Time.dump();
+		Time.dump();
 		String indexPath = args[1];
 		String[][] filtered = Utility.filterFlags(Utility.subarray(args, 2));
 		String[] flags = filtered[0];
@@ -332,7 +323,7 @@ public class App {
 		else //*{
 			//*
 
-			//PerfectMapGenerator<String, TimeWrap> perf = new PerfectObjectMapGenerator<String, TimeWrap>();
+			PerfectMapGenerator<String, TimeWrap> perf = new PerfectObjectMapGenerator<String, TimeWrap>();
 			Iterator it = Time.tReader.getIterator();
 			//HashMap<String, String> mp = new HashMap<String, String>();
 			//PerfectObjectMapGenerator<String, String> pMap = new PerfectObjectMapGenerator<String, String>();
@@ -340,10 +331,10 @@ public class App {
 			for(;it.nextKey();){
 				Time.ps.println(it.getKey() + " : " + it.getValueString());
 				//Time._Map.put(it.getKey(), new TimeWrap(it.getValueString().split("#")));
-				//perf.add(it.getKey(), new TimeWrap(it.getValueString().split("#")));
+				perf.add(it.getKey(), new TimeWrap(it.getValueString().split("#")));
 			}
 			Time.ps.close();
-			//Time._perfectMap = new TreeMap<String, TimeWrap>(perf.toMap());
+			Time._perfectMap = new TreeMap<String, TimeWrap>(perf.toMap());
 			
 			//*
 			

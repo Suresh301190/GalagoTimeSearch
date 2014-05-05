@@ -82,7 +82,7 @@ public class TimeTuple implements Serializable{
 	 * @throws IOException
 	 */
 	public static double overlap(String key) throws IOException{
-	
+
 		TimeWrap D = Time.getTimeWrap(key);
 		if(D == null){
 			//System.out.println(key + " -- > null");
@@ -90,7 +90,7 @@ public class TimeTuple implements Serializable{
 		}
 		else{
 			Time.qlog.println(key);
-			return -sumP_Q_T(D);
+			return 1/sumP_Q_T(D);
 			//return 1.0;
 		}
 		return 1;
@@ -101,10 +101,10 @@ public class TimeTuple implements Serializable{
 		double sum = 1.0;
 		//System.out.println(d.timeTuples.toString());
 		for(TimeTuple tup:d.timeTuples){
-			sum = sum + intersection(tup, qTF)/(abs(tup) * q_abs);
+			sum = sum + 1.0*intersection(tup, qTF)/(abs(tup) * q_abs);
 		}	
 		sum /= abs(d.timeFrame);
-		Time.qlog.println((1 + sum) + "\n");
+		if(Time.qlog != null) Time.qlog.println((1 + sum) + "\n");
 		return (1 + sum);
 	}
 
@@ -115,7 +115,7 @@ public class TimeTuple implements Serializable{
 
 	private static double intersection(TimeTuple tf, TimeTuple q) {
 		// TODO Auto-generated method stub
-		
+
 		/*
 		System.out.println("T : " + tf.toString());
 		System.out.println("Q : " + q.toString() + "\n");
@@ -137,12 +137,15 @@ public class TimeTuple implements Serializable{
 			if(in.tb_l.compareTo(in.tb_u) > 0 || in.te_l.compareTo(in.te_u) > 0){
 				return 0;
 			}
-			//*
-			Time.qlog.println("T : " + tf.toString());
-			Time.qlog.println("Q : " + q.toString());
-			Time.qlog.println("F : " + in.toString());
-			Time.qlog.println(abs(in));
-			//*/
+
+			if(Time.qlog != null){
+				//*
+				Time.qlog.println("T : " + tf.toString());
+				Time.qlog.println("Q : " + q.toString());
+				Time.qlog.println("F : " + in.toString());
+				Time.qlog.println(abs(in));
+				//*/
+			}
 
 			return (abs(in));
 		}
@@ -196,7 +199,7 @@ public class TimeTuple implements Serializable{
 				t.year = Integer.parseInt(term);
 				t.month = getMonth(document.terms, i);
 				t.date = getDate(document.terms, i);
-				
+
 				document.timeFrame.hasFrame = true;
 				document.timeFrame.update(t);
 				addTuple(document, t);
@@ -212,11 +215,12 @@ public class TimeTuple implements Serializable{
 				document.timeFrame.hasFrame = true;
 				if(t.year != 0) document.timeFrame.update(t);
 
-				if(Math.abs(counter - i) > 1){
+				if(!isQuery && Math.abs(counter - i) > 1){
 					addTuple(document, t);
 				}
 
-				if(isQuery){
+				if(isQuery && Math.abs(counter - i) > 1){
+					document.timeFrame.update(t);
 					document.terms.remove(i--);
 				}
 			}
@@ -230,12 +234,12 @@ public class TimeTuple implements Serializable{
 		//*/
 	}
 
-	
-	
+
+
 	private static synchronized void addTuple(Document document, Time t){
 		//System.out.println(t.toString() +" : "+ document.publication.toString());
 		if((ctmp = check.get(t.year)) != null){
-			
+
 			if(!ctmp.contains(t.month) || t.year == 0){
 				//System.out.println(t.toString() +" : "+ document.publication.toString());
 				document.T.add(new TimeTuple(t, document.publication));
@@ -388,7 +392,7 @@ public class TimeTuple implements Serializable{
 	}
 
 	StringBuffer sbTuple = new StringBuffer();
-	
+
 	static final HashSet<String> stopWords = 
 			new HashSet<String>(Arrays.asList("i'm","you're","he's","she's","it's","we're",
 					"they're","i've","you've","we've","they've","i'd","you'd","he'd","she'd",

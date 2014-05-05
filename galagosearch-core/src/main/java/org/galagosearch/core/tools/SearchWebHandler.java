@@ -301,7 +301,7 @@ public class SearchWebHandler extends AbstractHandler {
         	writer.append("<td width=\"15%\"></td>\n");
         	writer.append("<td width=\"55%\" >\n");
         	//String s=item.summary;
-            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n","Publication Date : "));//+item.timeFrame.toString()));
+            writer.append(String.format("<div onMouseover=\"ddrivetip('%s','#990033')\"; onMouseout=\"hideddrivetip()\" id=\"result\">\n","Publication Date : " +item.publication.toString()));
             writer.append(String.format("<a href=\"document?identifier=%s\">%s +\"   \"+%s</a><br/>" +
                                         "<div id=\"meta\">%s - %s</div>\n",
                                         item.identifier,
@@ -310,7 +310,7 @@ public class SearchWebHandler extends AbstractHandler {
                                         item.summary,
                                         item.displayTitle,
                                         scrub(item.identifier),
-                                       // item.timeFrame.toString(),
+                                        item.publication.toString(),
                                         scrub(item.url)));
             writer.append("</div>\n");
            // writer.append(" <div class=\"tooltip_description\" style=\"display:none\" title=\"Item 1 Description\">th desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>");
@@ -418,7 +418,7 @@ public class SearchWebHandler extends AbstractHandler {
         writer.write("#dhtmlpointer{position:absolute;left: -300px;z-index: 101;visibility: hidden;}");
         writer.write("#debug { display: none; }\n");
         writer.write("</style>");
-       // writer.append("<link rel=\"shortcut icon\" href=\"/images/favicon.ico\" />");
+        writer.append("<link rel=\"shortcut icon\" href=\"/images/favicon.ico\" />");
     }
 
     public void handleMainPage(HttpServletRequest request, HttpServletResponse response) throws IOException {

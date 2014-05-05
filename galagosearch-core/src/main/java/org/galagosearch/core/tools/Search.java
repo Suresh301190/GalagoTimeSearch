@@ -98,7 +98,7 @@ public class Search {
 		TimeTuple.setTimeFrame(doc, true);
 		TimeTuple.qTF = doc.timeFrame;
 		TimeTuple.Q_abs();
-		
+
 		//*
 		StringBuffer sb = new StringBuffer("");
 		for(String s:doc.terms){
@@ -117,7 +117,7 @@ public class Search {
 
 
 		Time.qFos = new PrintStream(new File("/home/ocean/Desktop/" + query + Time.counter++ + ".txt"));
-		Time.qlog = new PrintStream(new File("/home/ocean/Desktop/" + query + Time.counter++ + ".txt"));
+		Time.qlog = new PrintStream(new File("/home/ocean/Desktop/" + sb.toString() + Time.counter++ + ".txt"));
 		//Node tree = parseQuery(query, new Parameters());
 		Node tree = parseQuery(sb.toString(), new Parameters());
 		Node transformed = retrieval.transformQuery(tree);
@@ -141,8 +141,8 @@ public class Search {
 			item.identifier = identifier;
 			item.displayTitle = identifier;
 			TimeWrap w;
-			/*
-			if((w = Time._perfectTuples.get(identifier)) != null){
+			//*
+			if((w = Time.getTimeWrap(document.identifier)) != null){
 				item.publication = w.publication;
 				item.timeFrame = w.timeFrame;
 			}
@@ -174,8 +174,11 @@ public class Search {
 		}
 		System.out.println("qTF : " + TimeTuple.qTF.toString() 
 				+ "\n" + doc.terms.toString());
-		Time.qFos.close();
-		Time.qlog.close();
+
+		if(Time.qlog != null){
+			Time.qFos.close();
+			Time.qlog.close();
+		}
 		return result;
 	}
 
