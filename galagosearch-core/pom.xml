@@ -116,7 +116,7 @@
                       <name>galago</name>
                     </program>
                   </programs>
-                  <extraJvmArguments>-Xms256m -Xmx512m</extraJvmArguments>
+                  <extraJvmArguments>-Xms768m -Xmx1536m</extraJvmArguments>
                   <repositoryName>lib</repositoryName>
                   <repositoryLayout>flat</repositoryLayout>
                 </configuration>

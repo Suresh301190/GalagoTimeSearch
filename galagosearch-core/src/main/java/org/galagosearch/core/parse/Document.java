@@ -3,6 +3,7 @@
 package org.galagosearch.core.parse;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,4 +34,5 @@ public class Document implements Serializable {
     
     public TimeTuple timeFrame;
     public Time publication;
+    public ArrayList<TimeTuple> T;
 }

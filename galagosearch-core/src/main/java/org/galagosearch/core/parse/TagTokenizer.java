@@ -695,8 +695,11 @@ public class TagTokenizer implements Source<Document>, Processor<Document> {
 		 * Author
 		 * 		@Suresh
 		 */
-		TimeTuple.setTimeFrame(document);
-		Time.setPublicationTime(document);
+		if(Time.isBuild) {
+			Time.setPublicationTime(document);
+			TimeTuple.setTimeFrame(document, false);
+		}
+		
 		
 		//Time.ps.println(document.identifier + " : " + document.publication.toString());
 	}

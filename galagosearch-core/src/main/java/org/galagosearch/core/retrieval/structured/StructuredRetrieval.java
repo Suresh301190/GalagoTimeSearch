@@ -7,12 +7,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+
 import org.galagosearch.core.index.StructuredIndex;
-import org.galagosearch.core.retrieval.query.Node;
-import org.galagosearch.core.retrieval.query.StructuredQuery;
+import org.galagosearch.core.parse.Time;
+import org.galagosearch.core.parse.TimeTuple;
 import org.galagosearch.core.retrieval.Retrieval;
 import org.galagosearch.core.retrieval.ScoredDocument;
+import org.galagosearch.core.retrieval.query.Node;
 import org.galagosearch.core.retrieval.query.NodeType;
+import org.galagosearch.core.retrieval.query.StructuredQuery;
 import org.galagosearch.core.retrieval.query.Traversal;
 import org.galagosearch.tupleflow.Parameters;
 
@@ -101,7 +104,19 @@ public class StructuredRetrieval extends Retrieval {
         while (!iterator.isDone()) {
             int document = iterator.nextCandidate();
             int length = index.getLength(document);
-            double score = iterator.score(document, length);
+            //System.out.println(document + ":" + Integer.parseInt(Search.getIdentifier.getDocumentName(document)) + ":" + Time.abs_T[Integer.parseInt(Search.getIdentifier.getDocumentName(document))]);
+            double score;
+            if(!TimeTuple.check(TimeTuple.qTF.tb_l)){
+            	score = iterator.score(document, length)
+            			* TimeTuple.overlap(getDocumentName(document));
+            }
+            else {
+            	score = iterator.score(document, length);
+            }
+            
+            Time.qFos.println(getDocumentName(document) + " : " + score);
+            		
+
 
             if (queue.size() <= requested || queue.peek().score < score) {
                 ScoredDocument scoredDocument = new ScoredDocument(document, score);
@@ -111,7 +126,6 @@ public class StructuredRetrieval extends Retrieval {
                     queue.poll();
                 }
             }
-
             iterator.movePast(document);
         }
 

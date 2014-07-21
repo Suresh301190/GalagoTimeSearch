@@ -22,6 +22,6 @@ public class SearchWebHandlerTest extends TestCase {
     public void testImage() throws IOException {
         SearchWebHandler handler = new SearchWebHandler(null);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        handler.retrieveImage(stream);
+        handler.retrieveImage(stream,null);
     }
 }
